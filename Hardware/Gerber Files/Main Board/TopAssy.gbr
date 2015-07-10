@@ -1,0 +1,12 @@
+G04 DipTrace 2.4.0.2*
+%INTopAssy.gbr*%
+%MOIN*%
+%FSLAX44Y44*%
+G04*
+G70*
+G90*
+G75*
+G01*
+%LNTopAssy*%
+%LPD*%
+M02*
