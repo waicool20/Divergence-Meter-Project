@@ -13,7 +13,7 @@
 #
 ###############################################################################
 PROJECT_NAME = Divergence_Meter
-SOURCE = Divergence_Meter.c ShiftRegister.c
+SOURCE = Divergence_Meter.c ShiftRegister.c Display.c
 MCU = attiny861a
 MCU_FREQ = 8000000UL
 

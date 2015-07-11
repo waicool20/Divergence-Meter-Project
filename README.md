@@ -5,14 +5,14 @@ Hi~ I'm waicool20, this is the Divergence Meter Project! Just in case you're won
 
 Well anyways originally this project is based on this guy's project: http://www.mindspring.com/~tomtitor/ and it has helped greatly so I guess give him some credit? I tried to improve his design by improving electronics design with power efficiency and mind-friendliness in mind (hence the AVR so we can code in C :D) I designed the thing in Diptrace, but I have also included Gerber/Drill files in a convenient zip so you can just hand it to some manufacturer to make some boards (remember to remind them that it's 2 separate boards in a single zip and not one!) included also are the schematic PDFs which are not quite convenient... orz anyways have a look around.
 
-I just pulled this off my blog and it's not all the differences I think...feel free to help me expand this list :p
+I just pulled this off my blog ( http://waicool20.ga ) and it's not all the differences I think...feel free to help me expand this list :p
 
 > Additional Features:
 > - 5 switches possible! Could be less if you tweak the software
 > - Buzzer/Speaker output 😀 hurray for alarms in the morning
 > - Light Sensor to detect night time to conserve power and extend Nixie tube life (could probably act as a basic motion sensor with some software magic)
 > - Improvements/Slight changes:
-> - Should be able to fit 2x9V batteries instead of one so more portable cosplay time 😀
+> - Should be able to fit 2x9V batteries instead of one so more portable cosplay time :D
 > - Should be able to fit 2xAA RTC backup battery so it keeps track of time accurately for theoretically over a year.
 > - Interrupt based instead of Polling to conserve even more battery
 > - Uses the larger but cheaper and more available version of the HV5622
@@ -25,7 +25,9 @@ I just pulled this off my blog and it's not all the differences I think...feel f
 > - Can only use the DS3232 RTC and not the DS1307
 
 ##Project Structure
-Well the Hardware and Software git branches are separate so that they can be developed independently easily
+Well the Hardware and Software git branches are separate so that they can be developed independently easily.
+
+Basically if you want the latest Software changes please switch to the software branch. Same thing for hardware. Though most often it will be the software branch that will be updated.
 
 ##About the licensing...
 Well to keep it simple the hardware and the software are licensed with the TAPR OHL and GPLv3 respectively, if you are gonna use my work feel free to contact me at waicool20@gmail.com or not if that's how you swing. 

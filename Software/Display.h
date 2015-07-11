@@ -1,33 +1,34 @@
 /*  GPLv3 License
- *
- *   Copyright (c) Divergence Meter Project by waicool20
- *
+ *  
+ *  	Copyright (c) Divergence Meter Project by waicool20
+ *  	
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *
+ *  
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *
+ *  
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SHIFT_REGISTER_H_
-#define SHIFT_REGISTER_H_
+#ifndef DISPLAY_H_
+#define DISPLAY_H_
 
-void SRShift(char i);
+extern char tube1;
+extern char tube2;
+extern char tube3;
+extern char tube4;
+extern char tube5;
+extern char tube6;
+extern char tube7;
+extern char tube8;
 
-void SRLatch();
+void initDisplay();
 
-void SRON();
+void updateDisplay();
 
-void SROFF();
-
-void SRSendOnes(char i);
-
-void SRSendZeros(char i);
-
-#endif /* SHIFT_REGISTER_H_ */
+#endif /* DISPLAY_H_ */
