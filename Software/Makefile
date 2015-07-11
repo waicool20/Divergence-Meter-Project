@@ -13,7 +13,8 @@
 #
 ###############################################################################
 PROJECT_NAME = Divergence_Meter
-SOURCE = Divergence_Meter.c ShiftRegister.c Display.c
+CSOURCE = Divergence_Meter.c ShiftRegister.c Display.c
+ASMSOURCE = i2cmaster.S
 MCU = attiny861a
 MCU_FREQ = 8000000UL
 
@@ -44,6 +45,8 @@ AVRDUDE_GENERAL_COMMAND = "$(AVRDUDE) -c $(AVRDUDE_PROGRAMMER) -P $(AVRDUDE_PORT
 ELF_FILE = "$(PROJECT_NAME).elf"
 MAP_FILE = "$(PROJECT_NAME).map"
 LST_FILE = "$(PROJECT_NAME).lst"
+
+OBJ_FILES = $(CSOURCE:.c=.o) $(ASMSOURCE:.S=.o)
 
 FLASH_FILE = "$(PROJECT_NAME)_FLASH.hex"
 EEPROM_FILE = "$(PROJECT_NAME)_EEPROM.hex"
@@ -95,9 +98,7 @@ CFLAGS += -Wall
 CFLAGS += -Werror
 CFLAGS += -Wextra
 CFLAGS += -std=c99
-CFLAGS += $(SOURCE)
 CFLAGS += -mmcu=$(MCU)
-CFLAGS += -o $(ELF_FILE)
 
 #Assembly flags
 ASMFLAGS = -g
@@ -106,9 +107,7 @@ ASMFLAGS += -Wall
 ASMFLAGS += -Werror
 ASMFLAGS += -Wextra
 ASMFLAGS += -x assembler-with-cpp
-ASMFLAGS += $(SOURCE)
 ASMFLAGS += -mmcu=$(MCU)
-ASMFLAGS += -o $(ELF_FILE)
 
 #Linker Flags
 LDFLAGS = -Wl,-Map,$(MAP_FILE)
@@ -144,17 +143,17 @@ all: elf hex bin srec listings
 # AVRDUDE 6.1 above should be able to read all file formats
 #
 ###############################################################################
-elf:
-ifeq ("$(suffix $(SOURCE))", "$(filter %.c %.cs %.cpp, $(suffix $(SOURCE)))")
+elf: $(OBJ_FILES)
 	$(info Generating elf file...)
-	@$(CC) $(LDFLAGS) $(CFLAGS)
-else ifeq ("$(suffix $(SOURCE))", "$(filter %.asm %.S %.as, $(suffix $(SOURCE)))")
-	$(info Generating elf file...)
-	@$(CC) $(LDFLAGS) $(ASMFLAGS)
-else 
-	@$(error "Invalid Source File" )
-endif
-
+	@$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $(ELF_FILE) 
+	
+%.o: %.c
+	$(info Generating object file for $<)
+	@$(CC) -c $(CFLAGS) $< -o $@
+%.o: %.S
+	$(info Generating object file for $<)
+	@$(CC) -c $(CFLAGS) $< -o $@
+	
 hex: elf
 	$(info Generating hex files...)
 	@$(OBJCOPY) -j .text -j .data -O ihex $(ELF_FILE) $(FLASH_FILE)
@@ -167,7 +166,7 @@ hex: elf
 	@srec_cat $(FUSES_FILE) -Intel -crop 0x02 0x03 -offset -0x02 -O $(EFUSE_FILE) -Intel
 	$(info Generating FUSES hex)
 
-bin:
+bin: elf
 	$(info Generating bin files...)
 	@$(OBJCOPY) -j .text -j .data -O binary $(ELF_FILE) $(BFLASH_FILE)
 	$(info Generating Flash hex)
@@ -179,7 +178,7 @@ bin:
 	@srec_cat $(BFUSES_FILE) -Binary -crop 0x02 0x03 -offset -0x02 -O $(BEFUSE_FILE) -Binary
 	$(info Generating FUSES hex)
 
-srec:
+srec: elf
 	$(info Generating srec files...)
 	@$(OBJCOPY) -j .text -j .data -O srec $(ELF_FILE) $(SFLASH_FILE)
 	$(info Generating Flash hex)
@@ -236,5 +235,5 @@ program_fuses: hex
 ###############################################################################
 clean:
 	$(info Cleaning up :3)
-	@rm -rf $(ELF_FILE) $(MAP_FILE) $(LST_FILE) $(FLASH_FILE) $(EEPROM_FILE) $(FUSES_FILE) $(LFUSE_FILE) $(HFUSE_FILE) $(EFUSE_FILE) $(BFLASH_FILE) $(BEEPROM_FILE) $(BFUSES_FILE) $(BLFUSE_FILE) $(BHFUSE_FILE) $(BEFUSE_FILE) $(SFLASH_FILE) $(SEEPROM_FILE) $(SFUSES_FILE) $(SLFUSE_FILE) $(SHFUSE_FILE) $(SEFUSE_FILE)
+	@rm -rf $(ELF_FILE) $(MAP_FILE) $(LST_FILE) $(OBJ_FILES) $(FLASH_FILE) $(EEPROM_FILE) $(FUSES_FILE) $(LFUSE_FILE) $(HFUSE_FILE) $(EFUSE_FILE) $(BFLASH_FILE) $(BEEPROM_FILE) $(BFUSES_FILE) $(BLFUSE_FILE) $(BHFUSE_FILE) $(BEFUSE_FILE) $(SFLASH_FILE) $(SEEPROM_FILE) $(SFUSES_FILE) $(SLFUSE_FILE) $(SHFUSE_FILE) $(SEFUSE_FILE)
 ###############################################################################

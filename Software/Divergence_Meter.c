@@ -27,6 +27,7 @@
 #include <util/delay.h>
 #include "Constants.h"
 #include "Display.h"
+#include "i2cmaster.h"
 
 FUSES = { .low = 0x02, .high = 0xDF, .extended = 0x01, };
 
@@ -35,6 +36,7 @@ void initialize() {
   MCUCR = (1 << PUD);
   PORTB = 0x00;
   initDisplay();
+  i2c_init();
 }
 
 int main() {

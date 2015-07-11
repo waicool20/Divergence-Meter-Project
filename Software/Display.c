@@ -48,16 +48,6 @@ void handleShiftRegister1() {
     case 3:
       SRSendZeros(8);
       break;
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
-      SRSendZeros(tube6 - 4);
-      SRSendOnes(1);
-      SRSendZeros(11 - tube6);
-      break;
     case 0:
       SRSendZeros(6);
       SRSendOnes(1);
@@ -67,51 +57,35 @@ void handleShiftRegister1() {
       SRSendZeros(7);
       SRSendOnes(1);
       break;
+    default:
+      SRSendZeros(tube6 - 4);
+      SRSendOnes(1);
+      SRSendZeros(11 - tube6);
+      break;
   }
 
   switch (tube7) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
+    case 0:
+      SRSendZeros(10);
+      SRSendOnes(1);
+      SRSendZeros(1);
+      break;
+    case RDP:
+      SRSendZeros(11);
+      SRSendOnes(1);
+      break;
+    case LDP:
+      SRSendOnes(1);
+      SRSendZeros(11);
+      break;
+    default:
       SRSendZeros(tube7);
       SRSendOnes(1);
       SRSendZeros(11 - tube7);
       break;
-    case 0:
-      SRSendZeros(10);
-      SRSendOnes(1);
-      SRSendZeros(1);
-      break;
-    case RDP:
-      SRSendZeros(11);
-      SRSendOnes(1);
-      break;
-    case LDP:
-      SRSendOnes(1);
-      SRSendZeros(11);
-      break;
   }
 
   switch (tube8) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
-      SRSendZeros(tube8);
-      SRSendOnes(1);
-      SRSendZeros(11 - tube8);
-      break;
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -124,21 +98,17 @@ void handleShiftRegister1() {
     case LDP:
       SRSendOnes(1);
       SRSendZeros(11);
+      break;
+    default:
+      SRSendZeros(tube8);
+      SRSendOnes(1);
+      SRSendZeros(11 - tube8);
       break;
   }
 }
 
 void handleShiftRegister2() {
   switch (tube3) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-      SRSendZeros(4);
-      break;
     case 8:
     case 9:
       SRSendZeros(tube3 - 8);
@@ -154,51 +124,33 @@ void handleShiftRegister2() {
       SRSendZeros(3);
       SRSendOnes(1);
       break;
+    default:
+      SRSendZeros(4);
+      break;
   }
 
   switch (tube4) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
+    case 0:
+      SRSendZeros(10);
+      SRSendOnes(1);
+      SRSendZeros(1);
+      break;
+    case RDP:
+      SRSendZeros(11);
+      SRSendOnes(1);
+      break;
+    case LDP:
+      SRSendOnes(1);
+      SRSendZeros(11);
+      break;
+    default:
       SRSendZeros(tube4);
       SRSendOnes(1);
       SRSendZeros(11 - tube4);
       break;
-    case 0:
-      SRSendZeros(10);
-      SRSendOnes(1);
-      SRSendZeros(1);
-      break;
-    case RDP:
-      SRSendZeros(11);
-      SRSendOnes(1);
-      break;
-    case LDP:
-      SRSendOnes(1);
-      SRSendZeros(11);
-      break;
   }
 
   switch (tube5) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
-      SRSendZeros(tube5);
-      SRSendOnes(1);
-      SRSendZeros(11 - tube5);
-      break;
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -211,6 +163,11 @@ void handleShiftRegister2() {
     case LDP:
       SRSendOnes(1);
       SRSendZeros(11);
+      break;
+    default:
+      SRSendZeros(tube5);
+      SRSendOnes(1);
+      SRSendZeros(11 - tube5);
       break;
   }
 
@@ -222,37 +179,38 @@ void handleShiftRegister2() {
       SRSendOnes(1);
       SRSendZeros(3 - tube6);
       break;
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
-    case 0:
-    case RDP:
-      SRSendZeros(4);
-      break;
     case LDP:
       SRSendOnes(1);
       SRSendZeros(3);
+      break;
+    default:
+      SRSendZeros(4);
+      break;
   }
 }
 
 void handleShiftRegister3() {
   switch (tube1) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
+    case 0:
+      SRSendZeros(10);
+      SRSendOnes(1);
+      SRSendZeros(1);
+      break;
+    case RDP:
+      SRSendZeros(11);
+      SRSendOnes(1);
+      break;
+    case LDP:
+      SRSendOnes(1);
+      SRSendZeros(11);
+      break;
+    default:
       SRSendZeros(tube1);
       SRSendOnes(1);
       SRSendZeros(11 - tube1);
       break;
+  }
+  switch (tube2) {
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -266,48 +224,13 @@ void handleShiftRegister3() {
       SRSendOnes(1);
       SRSendZeros(11);
       break;
-  }
-  switch (tube2) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
+    default:
       SRSendZeros(tube2);
       SRSendOnes(1);
       SRSendZeros(11 - tube2);
-      break;
-    case 0:
-      SRSendZeros(10);
-      SRSendOnes(1);
-      SRSendZeros(1);
-      break;
-    case RDP:
-      SRSendZeros(11);
-      SRSendOnes(1);
-      break;
-    case LDP:
-      SRSendOnes(1);
-      SRSendZeros(11);
-      break;
   }
 
   switch (tube3) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-      SRSendZeros(tube3);
-      SRSendOnes(1);
-      SRSendZeros(7 - tube3);
-      break;
     case 8:
     case 9:
     case 0:
@@ -317,6 +240,11 @@ void handleShiftRegister3() {
     case LDP:
       SRSendOnes(1);
       SRSendZeros(7);
+      break;
+    default:
+      SRSendZeros(tube3);
+      SRSendOnes(1);
+      SRSendZeros(7 - tube3);
       break;
   }
 }
