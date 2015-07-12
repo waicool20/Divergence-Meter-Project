@@ -22,6 +22,8 @@
  * once the updateDisplay() function is called.
  */
 
+#include <avr/io.h>
+#include <avr/pgmspace.h>
 #include "Display.h"
 #include "ShiftRegister.h"
 #include "Constants.h"
@@ -35,10 +37,18 @@ char tube6 = 0;
 char tube7 = 0;
 char tube8 = 0;
 
+unsigned char brightness = 10;
+const unsigned char brightnessLevels[11] PROGMEM = {0,25,50,75,100,125,150,175,200,225,250};
+
 void initDisplay() {
+  //Clear shift registers
   SRSendZeros(96);
   SRLatch();
-  SRON();
+
+  //Setup Timer1 with Fast PWM mode with x1 prescaler
+  TCCR1A |= (1<<COM1A1) | (1<<PWM1A);
+  TCCR1B |= (1<<CS10);
+  OCR1A = pgm_read_byte(&(brightnessLevels[brightness]));
 }
 
 void handleShiftRegister1() {
@@ -254,4 +264,18 @@ void updateDisplay() {
   handleShiftRegister2();
   handleShiftRegister3();
   SRLatch();
+}
+
+void increaseDisplayBrightness(){
+  if(brightness < 10){
+    brightness++;
+    OCR1A = pgm_read_byte(&(brightnessLevels[brightness]));
+  }
+}
+
+void decreaseDisplayBrightness(){
+  if(brightness > 0){
+    brightness--;
+    OCR1A = pgm_read_byte(&(brightnessLevels[brightness]));
+  }
 }

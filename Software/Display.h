@@ -31,4 +31,8 @@ void initDisplay();
 
 void updateDisplay();
 
+void increaseDisplayBrightness();
+
+void decreaseDisplayBrightness();
+
 #endif /* DISPLAY_H_ */

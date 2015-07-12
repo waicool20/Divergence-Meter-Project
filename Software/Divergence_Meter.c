@@ -23,7 +23,6 @@
 
 #include <avr/io.h>
 #include <avr/fuse.h>
-#include <stdbool.h>
 #include <util/delay.h>
 #include "Constants.h"
 #include "Display.h"
@@ -52,11 +51,6 @@ int main() {
       tube7 = i;
       tube8 = i;
       updateDisplay();
-
-      _delay_ms(10);
-      _delay_ms(10);
-      _delay_ms(10);
-      _delay_ms(10);
       _delay_ms(10);
     }
   }
