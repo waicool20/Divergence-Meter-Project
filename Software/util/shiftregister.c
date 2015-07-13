@@ -17,42 +17,41 @@
  */
 
 /*
- * Main Program Entry of the Divergence Meter Project.
- * General logic will be implemented here.
+ * This is the code that handles the data shifting into the HV5622 Shift Registers.
  */
 
 #include <avr/io.h>
-#include <avr/fuse.h>
-#include <util/delay.h>
-#include "Constants.h"
-#include "Display.h"
-#include "i2cmaster.h"
 
-FUSES = { .low = 0x02, .high = 0xDF, .extended = 0x01, };
+#include "../constants.h"
 
-void initialize() {
-  DDRB = (1 << LE) | (1 << BL) | (1 << CLK) | (1 << DIN);
-  MCUCR = (1 << PUD);
-  PORTB = 0x00;
-  initDisplay();
-  i2c_init();
+void SRShift(char i) {
+  while (i) {
+    PORTB |= (1 << CLK);
+    PORTB &= ~(1 << CLK);
+    i--;
+  }
 }
 
-int main() {
-  initialize();
-  while (1) {
-    for (int i = 0; i < 12; i++) {
-      tube1 = i;
-      tube2 = i;
-      tube3 = i;
-      tube4 = i;
-      tube5 = i;
-      tube6 = i;
-      tube7 = i;
-      tube8 = i;
-      updateDisplay();
-      _delay_ms(10);
-    }
-  }
-  return 0;
+void SRLatch() {
+  PORTB |= (1 << LE);
+  PORTB &= ~(1 << LE);
+}
+
+void SRON() {
+  PORTB |= (1 << BL);
+}
+
+void SROFF() {
+  PORTB &= ~(1 << BL);
+}
+
+void SRSendOnes(char i) {
+  PORTB |= (1 << DIN);
+  SRShift(i);
+  PORTB &= ~(1 << DIN);
+}
+
+void SRSendZeros(char i) {
+  PORTB &= ~(1 << DIN);
+  SRShift(i);
 }

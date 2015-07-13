@@ -1,20 +1,20 @@
 #ifndef _I2CMASTER_H
 #define _I2CMASTER_H   1
 /************************************************************************* 
-* Title:    C include file for the I2C master interface 
-*           (i2cmaster.S or twimaster.c)
-* Author:   Peter Fleury <pfleury@gmx.ch>  http://jump.to/fleury
-* File:     $Id: i2cmaster.h,v 1.10 2005/03/06 22:39:57 Peter Exp $
-* Software: AVR-GCC 3.4.3 / avr-libc 1.2.3
-* Target:   any AVR device
-* Usage:    see Doxygen manual
-**************************************************************************/
+ * Title:    C include file for the I2C master interface 
+ *           (i2cmaster.S or twimaster.c)
+ * Author:   Peter Fleury <pfleury@gmx.ch>  http://jump.to/fleury
+ * File:     $Id: i2cmaster.h,v 1.10 2005/03/06 22:39:57 Peter Exp $
+ * Software: AVR-GCC 3.4.3 / avr-libc 1.2.3
+ * Target:   any AVR device
+ * Usage:    see Doxygen manual
+ **************************************************************************/
 
 #ifdef DOXYGEN
 /**
  @defgroup pfleury_ic2master I2C Master library
  @code #include <i2cmaster.h> @endcode
-  
+ 
  @brief I2C (TWI) Master Software Library
 
  Basic routines for communicating with I2C slave devices. This single master 
@@ -33,15 +33,15 @@
  Adjust the  CPU clock frequence F_CPU in twimaster.c or in the Makfile when using the TWI hardware implementaion.
 
  @note 
-    The module i2cmaster.S is based on the Atmel Application Note AVR300, corrected and adapted 
-    to GNU assembler and AVR-GCC C call interface.
-    Replaced the incorrect quarter period delays found in AVR300 with 
-    half period delays. 
-    
+ The module i2cmaster.S is based on the Atmel Application Note AVR300, corrected and adapted 
+ to GNU assembler and AVR-GCC C call interface.
+ Replaced the incorrect quarter period delays found in AVR300 with 
+ half period delays. 
+ 
  @author Peter Fleury pfleury@gmx.ch  http://jump.to/fleury
 
  @par API Usage Example
-  The following code shows typical usage of this library, see example test_i2cmaster.c
+ The following code shows typical usage of this library, see example test_i2cmaster.c
 
  @code
 
@@ -52,31 +52,31 @@
 
  int main(void)
  {
-     unsigned char ret;
+ unsigned char ret;
 
-     i2c_init();                             // initialize I2C library
+ i2c_init();                             // initialize I2C library
 
-     // write 0x75 to EEPROM address 5 (Byte Write) 
-     i2c_start_wait(Dev24C02+I2C_WRITE);     // set device address and write mode
-     i2c_write(0x05);                        // write address = 5
-     i2c_write(0x75);                        // write value 0x75 to EEPROM
-     i2c_stop();                             // set stop conditon = release bus
+ // write 0x75 to EEPROM address 5 (Byte Write) 
+ i2c_start_wait(Dev24C02+I2C_WRITE);     // set device address and write mode
+ i2c_write(0x05);                        // write address = 5
+ i2c_write(0x75);                        // write value 0x75 to EEPROM
+ i2c_stop();                             // set stop conditon = release bus
 
 
-     // read previously written value back from EEPROM address 5 
-     i2c_start_wait(Dev24C02+I2C_WRITE);     // set device address and write mode
+ // read previously written value back from EEPROM address 5 
+ i2c_start_wait(Dev24C02+I2C_WRITE);     // set device address and write mode
 
-     i2c_write(0x05);                        // write address = 5
-     i2c_rep_start(Dev24C02+I2C_READ);       // set device address and read mode
+ i2c_write(0x05);                        // write address = 5
+ i2c_rep_start(Dev24C02+I2C_READ);       // set device address and read mode
 
-     ret = i2c_readNak();                    // read one byte from EEPROM
-     i2c_stop();
+ ret = i2c_readNak();                    // read one byte from EEPROM
+ i2c_stop();
 
-     for(;;);
+ for(;;);
  }
  @endcode
 
-*/
+ */
 #endif /* DOXYGEN */
 
 /**@{*/
@@ -93,14 +93,12 @@
 /** defines the data direction (writing to I2C device) in i2c_start(),i2c_rep_start() */
 #define I2C_WRITE   0
 
-
 /**
  @brief initialize the I2C master interace. Need to be called only once 
  @param  void
  @return none
  */
 extern void i2c_init(void);
-
 
 /** 
  @brief Terminates the data transfer and releases the I2C bus 
@@ -109,16 +107,14 @@ extern void i2c_init(void);
  */
 extern void i2c_stop(void);
 
-
 /** 
  @brief Issues a start condition and sends address and transfer direction 
-  
+ 
  @param    addr address and transfer direction of I2C device
  @retval   0   device accessible 
  @retval   1   failed to access device 
  */
 extern unsigned char i2c_start(unsigned char addr);
-
 
 /**
  @brief Issues a repeated start condition and sends address and transfer direction 
@@ -129,17 +125,15 @@ extern unsigned char i2c_start(unsigned char addr);
  */
 extern unsigned char i2c_rep_start(unsigned char addr);
 
-
 /**
  @brief Issues a start condition and sends address and transfer direction 
-   
+ 
  If device is busy, use ack polling to wait until device ready 
  @param    addr address and transfer direction of I2C device
  @return   none
  */
 extern void i2c_start_wait(unsigned char addr);
 
- 
 /**
  @brief Send one byte to I2C device
  @param    data  byte to be transfered
@@ -147,7 +141,6 @@ extern void i2c_start_wait(unsigned char addr);
  @retval   1 write failed
  */
 extern unsigned char i2c_write(unsigned char data);
-
 
 /**
  @brief    read one byte from the I2C device, request more data from device 
@@ -167,12 +160,11 @@ extern unsigned char i2c_readNak(void);
  Implemented as a macro, which calls either i2c_readAck or i2c_readNak
  
  @param    ack 1 send ack, request more data from device<br>
-               0 send nak, read is followed by a stop condition 
+ 0 send nak, read is followed by a stop condition 
  @return   byte read from I2C device
  */
 extern unsigned char i2c_read(unsigned char ack);
 #define i2c_read(ack)  (ack) ? i2c_readAck() : i2c_readNak(); 
-
 
 /**@}*/
 #endif

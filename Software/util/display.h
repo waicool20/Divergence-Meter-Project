@@ -18,21 +18,22 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 
-extern char tube1;
-extern char tube2;
-extern char tube3;
-extern char tube4;
-extern char tube5;
-extern char tube6;
-extern char tube7;
-extern char tube8;
+typedef struct {
+  char tube1, tube2, tube3, tube4, tube5, tube6, tube7, tube8;
+} Display;
 
-void initDisplay();
+extern Display display;
 
-void updateDisplay();
+void display_init();
 
-void increaseDisplayBrightness();
+void display_update();
 
-void decreaseDisplayBrightness();
+void display_on();
+
+void display_off();
+
+void display_increaseBrightness();
+
+void display_decreaseBrightness();
 
 #endif /* DISPLAY_H_ */

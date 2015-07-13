@@ -1,56 +1,46 @@
 /*  GPLv3 License
- *
- *   Copyright (c) Divergence Meter Project by waicool20
- *
+ *  
+ *  	Copyright (c) Divergence Meter Project by waicool20
+ *  	
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *
+ *  
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *
+ *  
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
- * This is the code that handles the data shifting into the HV5622 Shift Registers.
+ * Random Number Generator code
  */
 
 #include <avr/io.h>
-#include "Constants.h"
 
-void SRShift(char i) {
-  while (i) {
-    PORTB |= (1 << CLK);
-    PORTB &= ~(1 << CLK);
-    i--;
-  }
+#include "../settings.h"
+
+char randa;
+char randb;
+char randc;
+char randx;
+
+void RNG_init() {
+  randa = ADCH;  //Seed with value from LDR
+  randb = settings.seconds;  //Seed with current second
+  randc = settings.minutes;  //Seed with current minute
+  randx = 1;
 }
 
-void SRLatch() {
-  PORTB |= (1 << LE);
-  PORTB &= ~(1 << LE);
-}
-
-void SRON() {
-  PORTB |= (1 << BL);
-}
-
-void SROFF() {
-  PORTB &= ~(1 << BL);
-}
-
-void SRSendOnes(char i) {
-  PORTB |= (1 << DIN);
-  SRShift(i);
-  PORTB &= ~(1 << DIN);
-}
-
-void SRSendZeros(char i) {
-  PORTB &= ~(1 << DIN);
-  SRShift(i);
+char RNG_nextChar() {
+  randx++;
+  randa = (randa ^ randc ^ randx);
+  randb = (randb + randa);
+  randc = (randc + ((randb >> 1) ^ randa));
+  char temp = randc & 0x0F;
+  return temp > 9 ? temp - 7 : temp;
 }

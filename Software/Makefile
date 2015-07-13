@@ -12,8 +12,8 @@
 # MCU_FREQ:								Microcontroller clock frequency in Hz 
 #
 ###############################################################################
-PROJECT_NAME = Divergence_Meter
-CSOURCE = Divergence_Meter.c ShiftRegister.c Display.c
+PROJECT_NAME = DivergenceMeter
+CSOURCE = DivergenceMeter.c util/shiftRegister.c util/display.c settings.c util/RNG.c
 ASMSOURCE = i2cmaster.S
 MCU = attiny861a
 MCU_FREQ = 8000000UL
@@ -88,7 +88,7 @@ SEFUSE_FILE = "$(PROJECT_NAME)_EFUSE.srec"
 CC = avr-gcc
 OBJCOPY = avr-objcopy
 OBJDUMP = avr-objdump
-OPT = 3
+OPT = s
 
 #C flags
 CFLAGS = -g

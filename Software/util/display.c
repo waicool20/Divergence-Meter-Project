@@ -22,25 +22,21 @@
  * once the updateDisplay() function is called.
  */
 
+#include "display.h"
+
 #include <avr/io.h>
 #include <avr/pgmspace.h>
-#include "Display.h"
-#include "ShiftRegister.h"
-#include "Constants.h"
 
-char tube1 = 0;
-char tube2 = 0;
-char tube3 = 0;
-char tube4 = 0;
-char tube5 = 0;
-char tube6 = 0;
-char tube7 = 0;
-char tube8 = 0;
+#include "../constants.h"
+#include "../settings.h"
+#include "shiftregister.h"
 
-unsigned char brightness = 10;
+unsigned char brightness;
 const unsigned char brightnessLevels[11] PROGMEM = {0,25,50,75,100,125,150,175,200,225,250};
 
-void initDisplay() {
+Display display;
+
+void display_init() {
   //Clear shift registers
   SRSendZeros(96);
   SRLatch();
@@ -48,11 +44,15 @@ void initDisplay() {
   //Setup Timer1 with Fast PWM mode with x1 prescaler
   TCCR1A |= (1<<COM1A1) | (1<<PWM1A);
   TCCR1B |= (1<<CS10);
+  brightness = settings.brightness;
   OCR1A = pgm_read_byte(&(brightnessLevels[brightness]));
+
+  display_on();
+  display_update();
 }
 
 void handleShiftRegister1() {
-  switch (tube6) {
+  switch (display.tube6) {
     case 1:
     case 2:
     case 3:
@@ -67,14 +67,17 @@ void handleShiftRegister1() {
       SRSendZeros(7);
       SRSendOnes(1);
       break;
+    case BLANK:
+      SRSendZeros(8);
+      break;
     default:
-      SRSendZeros(tube6 - 4);
+      SRSendZeros(display.tube6 - 4);
       SRSendOnes(1);
-      SRSendZeros(11 - tube6);
+      SRSendZeros(11 - display.tube6);
       break;
   }
 
-  switch (tube7) {
+  switch (display.tube7) {
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -88,14 +91,17 @@ void handleShiftRegister1() {
       SRSendOnes(1);
       SRSendZeros(11);
       break;
+    case BLANK:
+      SRSendZeros(12);
+      break;
     default:
-      SRSendZeros(tube7);
+      SRSendZeros(display.tube7);
       SRSendOnes(1);
-      SRSendZeros(11 - tube7);
+      SRSendZeros(11 - display.tube7);
       break;
   }
 
-  switch (tube8) {
+  switch (display.tube8) {
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -109,21 +115,24 @@ void handleShiftRegister1() {
       SRSendOnes(1);
       SRSendZeros(11);
       break;
+    case BLANK:
+      SRSendZeros(12);
+      break;
     default:
-      SRSendZeros(tube8);
+      SRSendZeros(display.tube8);
       SRSendOnes(1);
-      SRSendZeros(11 - tube8);
+      SRSendZeros(11 - display.tube8);
       break;
   }
 }
 
 void handleShiftRegister2() {
-  switch (tube3) {
+  switch (display.tube3) {
     case 8:
     case 9:
-      SRSendZeros(tube3 - 8);
+      SRSendZeros(display.tube3 - 8);
       SRSendOnes(1);
-      SRSendZeros(11 - tube3);
+      SRSendZeros(11 - display.tube3);
       break;
     case 0:
       SRSendZeros(2);
@@ -134,12 +143,15 @@ void handleShiftRegister2() {
       SRSendZeros(3);
       SRSendOnes(1);
       break;
+    case BLANK:
+      SRSendZeros(4);
+      break;
     default:
       SRSendZeros(4);
       break;
   }
 
-  switch (tube4) {
+  switch (display.tube4) {
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -153,14 +165,17 @@ void handleShiftRegister2() {
       SRSendOnes(1);
       SRSendZeros(11);
       break;
+    case BLANK:
+      SRSendZeros(12);
+      break;
     default:
-      SRSendZeros(tube4);
+      SRSendZeros(display.tube4);
       SRSendOnes(1);
-      SRSendZeros(11 - tube4);
+      SRSendZeros(11 - display.tube4);
       break;
   }
 
-  switch (tube5) {
+  switch (display.tube5) {
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -174,24 +189,30 @@ void handleShiftRegister2() {
       SRSendOnes(1);
       SRSendZeros(11);
       break;
+    case BLANK:
+      SRSendZeros(12);
+      break;
     default:
-      SRSendZeros(tube5);
+      SRSendZeros(display.tube5);
       SRSendOnes(1);
-      SRSendZeros(11 - tube5);
+      SRSendZeros(11 - display.tube5);
       break;
   }
 
-  switch (tube6) {
+  switch (display.tube6) {
     case 1:
     case 2:
     case 3:
-      SRSendZeros(tube6);
+      SRSendZeros(display.tube6);
       SRSendOnes(1);
-      SRSendZeros(3 - tube6);
+      SRSendZeros(3 - display.tube6);
       break;
     case LDP:
       SRSendOnes(1);
       SRSendZeros(3);
+      break;
+    case BLANK:
+      SRSendZeros(4);
       break;
     default:
       SRSendZeros(4);
@@ -200,7 +221,7 @@ void handleShiftRegister2() {
 }
 
 void handleShiftRegister3() {
-  switch (tube1) {
+  switch (display.tube1) {
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -214,13 +235,16 @@ void handleShiftRegister3() {
       SRSendOnes(1);
       SRSendZeros(11);
       break;
+    case BLANK:
+      SRSendZeros(12);
+      break;
     default:
-      SRSendZeros(tube1);
+      SRSendZeros(display.tube1);
       SRSendOnes(1);
-      SRSendZeros(11 - tube1);
+      SRSendZeros(11 - display.tube1);
       break;
   }
-  switch (tube2) {
+  switch (display.tube2) {
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -234,13 +258,16 @@ void handleShiftRegister3() {
       SRSendOnes(1);
       SRSendZeros(11);
       break;
+    case BLANK:
+      SRSendZeros(12);
+      break;
     default:
-      SRSendZeros(tube2);
+      SRSendZeros(display.tube2);
       SRSendOnes(1);
-      SRSendZeros(11 - tube2);
+      SRSendZeros(11 - display.tube2);
   }
 
-  switch (tube3) {
+  switch (display.tube3) {
     case 8:
     case 9:
     case 0:
@@ -251,29 +278,42 @@ void handleShiftRegister3() {
       SRSendOnes(1);
       SRSendZeros(7);
       break;
+    case BLANK:
+      SRSendZeros(8);
+      break;
     default:
-      SRSendZeros(tube3);
+      SRSendZeros(display.tube3);
       SRSendOnes(1);
-      SRSendZeros(7 - tube3);
+      SRSendZeros(7 - display.tube3);
       break;
   }
 }
 
-void updateDisplay() {
+void display_update() {
   handleShiftRegister1();
   handleShiftRegister2();
   handleShiftRegister3();
   SRLatch();
 }
 
-void increaseDisplayBrightness(){
+void display_on(){
+  DDRB &= ~(1<<HV_DISABLE);
+  PORTB &= ~(1<<HV_DISABLE);
+}
+
+void display_off(){
+  DDRB |= (1<<HV_DISABLE);
+  PORTB |= (1<<HV_DISABLE);
+}
+
+void display_increaseBrightness(){
   if(brightness < 10){
     brightness++;
     OCR1A = pgm_read_byte(&(brightnessLevels[brightness]));
   }
 }
 
-void decreaseDisplayBrightness(){
+void display_decreaseBrightness(){
   if(brightness > 0){
     brightness--;
     OCR1A = pgm_read_byte(&(brightnessLevels[brightness]));
