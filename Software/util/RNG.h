@@ -24,4 +24,6 @@ void RNG_init();
 
 uint8_t RNG_nextChar();
 
+uint8_t RNG_nextCharWithDP();
+
 #endif /* RNG_H_ */

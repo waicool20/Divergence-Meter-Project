@@ -25,6 +25,8 @@
 
 #include "../settings.h"
 
+void RNG_next();
+
 uint8_t randa;
 uint8_t randb;
 uint8_t randc;
@@ -37,11 +39,21 @@ void RNG_init() {
   randx = 1;
 }
 
-uint8_t RNG_nextChar() {
+void RNG_next(){
   randx++;
   randa = (randa ^ randc ^ randx);
   randb = (randb + randa);
   randc = (randc + ((randb >> 1) ^ randa));
+}
+
+uint8_t RNG_nextChar() {
+  RNG_next();
   uint8_t temp = randc & 0x0F;
-  return temp > 9 ? temp - 7 : temp;
+  return temp > 9 ? temp - (16-9) : temp;
+}
+
+uint8_t RNG_nextCharWithDP(){
+  RNG_next();
+  uint8_t temp = randc & 0x0F;
+  return temp > 11 ? temp - (16-11) : temp;
 }

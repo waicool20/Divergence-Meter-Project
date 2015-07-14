@@ -20,7 +20,10 @@
  * Main Program Entry of the Divergence Meter Project.
  * General logic will be implemented here.
  */
+
 #include <stdint.h>
+#include <stdbool.h>
+
 #include <avr/io.h>
 #include <avr/fuse.h>
 #include <avr/interrupt.h>
@@ -28,8 +31,6 @@
 #include <avr/power.h>
 #include <avr/pgmspace.h>
 #include <util/delay.h>
-
-#include <stdbool.h>
 
 #include "constants.h"
 #include "i2cmaster.h"
@@ -57,19 +58,29 @@ const uint8_t PROGMEM WORLD_LINES[32][8] = { { 0, RDP, 0, 0, 0, 0, 0, 0 }, { 0,
 
 /* Prototypes */
 
+
 void DivergenceMeter_init();
-void DivergenceMeter_rollWorldLine();
-void DivergenceMeter_rollWorldLineWithDelay();
+
 void DivergenceMeter_clockMode();
-void DivergenceMeter_DivergenceMode();
-void DivergenceMeter_DivergenceEditMode();
-void DivergenceMeter_SettingsMode();
 void DivergenceMeter_displayCurrentTime();
 void DivergenceMeter_displayCurrentDate();
 
-/* Main Code Start */
+
+void DivergenceMeter_divergenceMode();
+void DivergenceMeter_showCurrentWorldLine();
+void DivergenceMeter_showPrevWorldLine();
+void DivergenceMeter_showNextWorldLine();
+
+void DivergenceMeter_divergenceEditMode();
+void DivergenceMeter_settingsMode();
+
+void DivergenceMeter_rollWorldLine(bool rollTube2);
+void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2);
+
+/* Volatile Variables (Modifiable by ISR)*/
 
 volatile uint8_t current_mode = 0;
+volatile uint8_t clockCount = 0;
 volatile bool just_entered_mode[4] = { false, false, false };
 volatile uint16_t button_count[5] = { 0, 0, 0, 0, 0 };
 
@@ -78,7 +89,13 @@ volatile bool button_short_pressed[5] = { false, false, false, false, false };
 volatile bool button_long_pressed[5] = { false, false, false, false, false };
 volatile uint8_t button_time_since_last_pressed[5] = { 0, 0, 0, 0, 0 };
 
+/* Normal Variables */
+
 bool shouldRoll = false;
+uint8_t currentWorldLineIndex = 0;
+uint8_t currentTube = 0;
+
+/* Main Code Start */
 
 int main() {
   DivergenceMeter_init();
@@ -88,13 +105,13 @@ int main() {
         DivergenceMeter_clockMode();
         break;
       case DIVERGENCE_MODE:
-        DivergenceMeter_DivergenceMode();
+        DivergenceMeter_divergenceMode();
         break;
       case DIVERGENCE_EDIT_MODE:
-        DivergenceMeter_DivergenceEditMode();
+        DivergenceMeter_divergenceEditMode();
         break;
       case SETTINGS_MODE:
-        DivergenceMeter_SettingsMode();
+        DivergenceMeter_settingsMode();
         break;
     }
   }
@@ -109,21 +126,110 @@ int main() {
   return 0;
 }
 
-uint8_t clockCount = 0;
+void tmr0_init() {
+  TCCR0A = (1 << TCW0);  //16 bit width
+  TCCR0B = (1 << CS01);  //x8 prescaler
+  unsigned int val = 10000;  // 10ms interval calculated by (Seconds)/(1/(((System Clock))/prescaler))
+  OCR0B = (val >> 8);
+  OCR0A = (uint8_t) val;
+  TIMSK = (1 << OCIE0A);  //Compare Match interrupt enable
+}
 
-void DivergenceMeter_clockMode() {
-  if(clockCount == 10){
-    settings_readDS3232();
-    DivergenceMeter_displayCurrentTime();
-    clockCount = 0;
+void ADC_init() {
+  ADMUX = (1 << ADLAR) | 0x07;
+  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1);
+  ADCSRA |= (1 << ADSC);
+  while (ADCSRA & (1 << ADSC))
+    ;
+}
+
+void DivergenceMeter_init() {
+  //Initialize IO
+  DDRA &= ~(1 << ALARM_INT) | ~(1 << BUTTON1_PIN) | ~(1 << BUTTON2_PIN)
+      | ~(1 << BUTTON3_PIN) | ~(1 << BUTTON4_PIN) | ~(1 << BUTTON5_PIN);
+  DDRB = (1 << LE) | (1 << BL) | (1 << CLK) | (1 << DIN) | (1 << SPEAKER);
+  MCUCR = (1 << PUD);
+  PORTB = 0x00;
+
+  //Global interrupt enable
+  sei();
+
+  i2c_init();
+  settings_init();
+  ADC_init();
+  RNG_init();
+  tmr0_init();
+  display_init();
+}
+
+/* Timer0 Interrupt Code, runned every 10ms as configured*/
+
+ISR(TIMER0_COMPA_vect) {
+  for (int i = 4; i >= 0; i--) {
+    if (bit_is_set(PINA, i+3) && button_count[i] < 65535) {
+      button_count[i]++;
+    } else {
+      button_count[i] = 0;
+      button_is_pressed[i] = false;
+      button_short_pressed[i] = false;
+      button_long_pressed[i] = false;
+    }
+    if (button_count[i] >= (BUTTON_LONG_PRESS_MIN_DURATION_MS / 10)) {
+      button_is_pressed[i] = true;
+      button_short_pressed[i] = false;
+      button_long_pressed[i] = true;
+    }
+    if (button_count[i] > (BUTTON_SHORT_PRESS_MIN_DURATION_MS / 10)
+        && button_count[i] <= (BUTTON_SHORT_PRESS_MAX_DURATION_MS / 10)
+        && !button_long_pressed[i]) {
+      button_is_pressed[i] = true;
+      button_short_pressed[i] = true;
+      button_long_pressed[i] = false;
+    }
+    if (button_time_since_last_pressed[i] < 255) {
+      button_time_since_last_pressed[i]++;
+    }
   }
 
+  if ((button_short_pressed[BUTTON1] || button_long_pressed[BUTTON1])
+      && button_time_since_last_pressed[BUTTON1] > 10) {
+    if (current_mode < SETTINGS_MODE) {
+      current_mode++;
+    } else {
+      current_mode = 0;
+    }
+    _delay_ms(200);
+    just_entered_mode[current_mode] = true;
+    button_time_since_last_pressed[BUTTON1] = 0;
+  }
+  clockCount++;
+  if(clockCount > 9){
+    settings_readDS3232();
+    clockCount = 0;
+  }
+  TCNT0H = 0x00;
+  TCNT0L = 0x00;
+}
+
+/* Clock Mode Code */
+
+void DivergenceMeter_clockMode() {
+  DivergenceMeter_displayCurrentTime();
+  switch (settings.seconds){
+    case 0x00:
+      shouldRoll = true;
+      DivergenceMeter_rollWorldLine(false);
+      DivergenceMeter_displayCurrentDate();
+      shouldRoll = false;
+      _delay_ms((DATE_DISPLAY_SECONDS * 1000));
+      break;
+  }
   if (button_short_pressed[BUTTON2] || button_long_pressed[BUTTON2]) {
     DivergenceMeter_displayCurrentDate();
     _delay_ms((DATE_DISPLAY_SECONDS * 1000));
   } else if (button_short_pressed[BUTTON3] || button_long_pressed[BUTTON3]) {
     shouldRoll = true;
-    DivergenceMeter_rollWorldLineWithDelay();
+    DivergenceMeter_rollWorldLineWithDelay(true);
   } else if (button_short_pressed[BUTTON4]) {
 
   } else if (button_short_pressed[BUTTON5] || button_long_pressed[BUTTON5]) {
@@ -134,52 +240,48 @@ void DivergenceMeter_clockMode() {
   just_entered_mode[CLOCK_MODE] = false;
 }
 
-uint8_t currentWorldLine = 0;
+void DivergenceMeter_displayCurrentTime() {
+  display.tube[TUBE1] = (settings.hours >> 4) & 0x01;
+  display.tube[TUBE2] = settings.hours & 0x0F;
 
-void DivergenceMeter_showCurrentWorldLine() {
-  display.tube[TUBE1] = pgm_read_byte(&(WORLD_LINES[currentWorldLine][0]));
-  display.tube[TUBE2] = pgm_read_byte(&(WORLD_LINES[currentWorldLine][1]));
-  display.tube[TUBE3] = pgm_read_byte(&(WORLD_LINES[currentWorldLine][2]));
-  display.tube[TUBE4] = pgm_read_byte(&(WORLD_LINES[currentWorldLine][3]));
-  display.tube[TUBE5] = pgm_read_byte(&(WORLD_LINES[currentWorldLine][4]));
-  display.tube[TUBE6] = pgm_read_byte(&(WORLD_LINES[currentWorldLine][5]));
-  display.tube[TUBE7] = pgm_read_byte(&(WORLD_LINES[currentWorldLine][6]));
-  display.tube[TUBE8] = pgm_read_byte(&(WORLD_LINES[currentWorldLine][7]));
+  display.tube[TUBE4] = (settings.minutes >> 4);
+  display.tube[TUBE5] = settings.minutes & 0x0F;
+
+  display.tube[TUBE7] = (settings.seconds >> 4);
+  display.tube[TUBE8] = settings.seconds & 0x0F;
   display_update();
 }
 
-void DivergenceMeter_showNextWorldLine() {
-  if (currentWorldLine < 31) {
-    currentWorldLine++;
-  } else {
-    currentWorldLine = 0;
-  }
-  DivergenceMeter_showCurrentWorldLine();
+void DivergenceMeter_displayCurrentDate() {
+  display.tube[TUBE1] = (settings.date >> 4) & 0x03;
+  display.tube[TUBE2] = settings.date & 0x0F;
+  display.tube[TUBE3] = LDP;
+  display.tube[TUBE4] = (settings.month >> 4) & 0x01;
+  display.tube[TUBE5] = settings.month & 0x0F;
+  display.tube[TUBE3] = RDP;
+  display.tube[TUBE7] = (settings.year >> 4);
+  display.tube[TUBE8] = settings.year & 0x0F;
+  display_update();
 }
 
-void DivergenceMeter_showPrevWorldLine() {
-  if (currentWorldLine > 0) {
-    currentWorldLine--;
-  } else {
-    currentWorldLine = 31;
-  }
-  DivergenceMeter_showCurrentWorldLine();
-}
+/* Divergence Mode Code */
 
-void DivergenceMeter_DivergenceMode() {
+void DivergenceMeter_divergenceMode() {
   if (just_entered_mode[DIVERGENCE_MODE]) {
-    DivergenceMeter_rollWorldLineWithDelay();
+    DivergenceMeter_rollWorldLineWithDelay(true);
   }
   if (button_short_pressed[BUTTON2] && button_short_pressed[BUTTON4]) {
     current_mode = DIVERGENCE_EDIT_MODE;
     just_entered_mode[DIVERGENCE_EDIT_MODE] = true;
   } else if (button_short_pressed[BUTTON2]) {
+    DivergenceMeter_rollWorldLine(true);
     DivergenceMeter_showPrevWorldLine();
     _delay_ms(200);
   } else if (button_short_pressed[BUTTON3] || button_long_pressed[BUTTON3]) {
     shouldRoll = true;
-    DivergenceMeter_rollWorldLine();
+    DivergenceMeter_rollWorldLine(true);
   } else if (button_short_pressed[BUTTON4]) {
+    DivergenceMeter_rollWorldLine(true);
     DivergenceMeter_showNextWorldLine();
     _delay_ms(200);
   } else if (button_short_pressed[BUTTON5] || button_long_pressed[BUTTON5]) {
@@ -193,9 +295,39 @@ void DivergenceMeter_DivergenceMode() {
   just_entered_mode[DIVERGENCE_MODE] = false;
 }
 
-uint8_t currentTube = 0;
+void DivergenceMeter_showCurrentWorldLine() {
+  display.tube[TUBE1] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][0]));
+  display.tube[TUBE2] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][1]));
+  display.tube[TUBE3] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][2]));
+  display.tube[TUBE4] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][3]));
+  display.tube[TUBE5] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][4]));
+  display.tube[TUBE6] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][5]));
+  display.tube[TUBE7] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][6]));
+  display.tube[TUBE8] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][7]));
+  display_update();
+}
 
-void DivergenceMeter_DivergenceEditMode() {
+void DivergenceMeter_showNextWorldLine() {
+  if (currentWorldLineIndex < 31) {
+    currentWorldLineIndex++;
+  } else {
+    currentWorldLineIndex = 0;
+  }
+  DivergenceMeter_showCurrentWorldLine();
+}
+
+void DivergenceMeter_showPrevWorldLine() {
+  if (currentWorldLineIndex > 0) {
+    currentWorldLineIndex--;
+  } else {
+    currentWorldLineIndex = 31;
+  }
+  DivergenceMeter_showCurrentWorldLine();
+}
+
+/* Divergence Edit Mode */
+
+void DivergenceMeter_divergenceEditMode() {
   if (just_entered_mode[DIVERGENCE_EDIT_MODE]) {
     currentTube = 0;
     just_entered_mode[DIVERGENCE_EDIT_MODE] = false;
@@ -257,7 +389,9 @@ void DivergenceMeter_DivergenceEditMode() {
   }
 }
 
-void DivergenceMeter_SettingsMode() {
+/* Settings Mode Code */
+
+void DivergenceMeter_settingsMode() {
   display.tube[TUBE1] = 1;
   display.tube[TUBE2] = 2;
   display.tube[TUBE3] = 3;
@@ -269,114 +403,13 @@ void DivergenceMeter_SettingsMode() {
   display_update();
 }
 
-void tmr0_init() {
-  TCCR0A = (1 << TCW0);  //16 bit width
-  TCCR0B = (1 << CS01);  //x8 prescaler
-  unsigned int val = 10000;  // 10ms interval calculated by (Seconds)/(1/(((System Clock))/prescaler))
-  OCR0B = (val >> 8);
-  OCR0A = (uint8_t) val;
-  TIMSK = (1 << OCIE0A);  //Compare Match interrupt enable
-}
-
-void ADC_init() {
-  ADMUX = (1 << ADLAR) | 0x07;
-  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1);
-  ADCSRA |= (1 << ADSC);
-  while (ADCSRA & (1 << ADSC))
-    ;
-}
-
-void DivergenceMeter_init() {
-  //Initialize IO
-  DDRA &= ~(1 << ALARM_INT) | ~(1 << BUTTON1_PIN) | ~(1 << BUTTON2_PIN)
-      | ~(1 << BUTTON3_PIN) | ~(1 << BUTTON4_PIN) | ~(1 << BUTTON5_PIN);
-  DDRB = (1 << LE) | (1 << BL) | (1 << CLK) | (1 << DIN) | (1 << SPEAKER);
-  MCUCR = (1 << PUD);
-  PORTB = 0x00;
-
-  //Global interrupt enable
-  sei();
-
-  i2c_init();
-  settings_init();
-  ADC_init();
-  RNG_init();
-  tmr0_init();
-  display_init();
-}
-
-ISR(TIMER0_COMPA_vect) {
-  for (int i = 4; i >= 0; i--) {
-    if (bit_is_set(PINA, i+3) && button_count[i] < 65535) {
-      button_count[i]++;
-    } else {
-      button_count[i] = 0;
-      button_is_pressed[i] = false;
-      button_short_pressed[i] = false;
-      button_long_pressed[i] = false;
-    }
-    if (button_count[i] >= (BUTTON_LONG_PRESS_MIN_DURATION_MS / 10)) {
-      button_is_pressed[i] = true;
-      button_short_pressed[i] = false;
-      button_long_pressed[i] = true;
-    }
-    if (button_count[i] > (BUTTON_SHORT_PRESS_MIN_DURATION_MS / 10)
-        && button_count[i] <= (BUTTON_SHORT_PRESS_MAX_DURATION_MS / 10)
-        && !button_long_pressed[i]) {
-      button_is_pressed[i] = true;
-      button_short_pressed[i] = true;
-      button_long_pressed[i] = false;
-    }
-    if (button_time_since_last_pressed[i] < 255) {
-      button_time_since_last_pressed[i]++;
-    }
-  }
-
-  if ((button_short_pressed[BUTTON1] || button_long_pressed[BUTTON1])
-      && button_time_since_last_pressed[BUTTON1] > 10) {
-    if (current_mode < SETTINGS_MODE) {
-      current_mode++;
-    } else {
-      current_mode = 0;
-    }
-    _delay_ms(200);
-    just_entered_mode[current_mode] = true;
-    button_time_since_last_pressed[BUTTON1] = 0;
-  }
-  clockCount++;
-  TCNT0H = 0x00;
-  TCNT0L = 0x00;
-}
-
-void DivergenceMeter_displayCurrentTime() {
-  display.tube[TUBE1] = (settings.hours >> 4) & 0x01;
-  display.tube[TUBE2] = settings.hours & 0x0F;
-
-  display.tube[TUBE4] = (settings.minutes >> 4);
-  display.tube[TUBE5] = settings.minutes & 0x0F;
-
-  display.tube[TUBE7] = (settings.seconds >> 4);
-  display.tube[TUBE8] = settings.seconds & 0x0F;
-  display_update();
-}
-
-void DivergenceMeter_displayCurrentDate() {
-  display.tube[TUBE1] = (settings.date >> 4) & 0x03;
-  display.tube[TUBE2] = settings.date & 0x0F;
-  display.tube[TUBE3] = LDP;
-  display.tube[TUBE4] = (settings.month >> 4) & 0x01;
-  display.tube[TUBE5] = settings.month & 0x0F;
-  display.tube[TUBE3] = RDP;
-  display.tube[TUBE7] = (settings.year >> 4);
-  display.tube[TUBE8] = settings.year & 0x0F;
-  display_update();
-}
+/* Misc Code */
 
 bool DivergenceMeter_shouldNotRoll() {
   return current_mode != DIVERGENCE_MODE && !shouldRoll;
 }
 
-void DivergenceMeter_rollWorldLine() {
+void DivergenceMeter_rollWorldLine(bool rollTube2) {
   for (uint8_t i = ((ROLL_SECONDS * 1000) / ROLL_INTERVAL_MS); i > 0; i--) {
     if (DivergenceMeter_shouldNotRoll()) {
       return;
@@ -387,7 +420,7 @@ void DivergenceMeter_rollWorldLine() {
       display.tube[TUBE1] =
           RNG_nextChar() == 9 ? BLANK : (RNG_nextChar() == 8 ? 1 : 0);
     }
-    display.tube[TUBE2] = RDP;
+    display.tube[TUBE2] = rollTube2 ? RDP : RNG_nextChar();
     display.tube[TUBE3] = RNG_nextChar();
     display.tube[TUBE4] = RNG_nextChar();
     display.tube[TUBE5] = RNG_nextChar();
@@ -404,8 +437,8 @@ void DivergenceMeter_rollWorldLine() {
   }
 }
 
-void DivergenceMeter_rollWorldLineWithDelay() {
-  DivergenceMeter_rollWorldLine();
+void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2) {
+  DivergenceMeter_rollWorldLine(rollTube2);
   for (int i = (ROLL_DISPLAY_SECONDS * 100); i > 0; i--) {
     if (DivergenceMeter_shouldNotRoll()) {
       return;
