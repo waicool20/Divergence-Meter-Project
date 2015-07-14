@@ -18,7 +18,9 @@
 #ifndef SHIFT_REGISTER_H_
 #define SHIFT_REGISTER_H_
 
-void SRShift(char i);
+#include <stdint.h>
+
+void SRShift(uint8_t i);
 
 void SRLatch();
 
@@ -26,8 +28,8 @@ void SRON();
 
 void SROFF();
 
-void SRSendOnes(char i);
+void SRSendOnes(uint8_t i);
 
-void SRSendZeros(char i);
+void SRSendZeros(uint8_t i);
 
 #endif /* SHIFT_REGISTER_H_ */

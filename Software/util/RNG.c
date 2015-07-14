@@ -20,14 +20,15 @@
  * Random Number Generator code
  */
 
+#include <stdint.h>
 #include <avr/io.h>
 
 #include "../settings.h"
 
-char randa;
-char randb;
-char randc;
-char randx;
+uint8_t randa;
+uint8_t randb;
+uint8_t randc;
+uint8_t randx;
 
 void RNG_init() {
   randa = ADCH;  //Seed with value from LDR
@@ -36,11 +37,11 @@ void RNG_init() {
   randx = 1;
 }
 
-char RNG_nextChar() {
+uint8_t RNG_nextChar() {
   randx++;
   randa = (randa ^ randc ^ randx);
   randb = (randb + randa);
   randc = (randc + ((randb >> 1) ^ randa));
-  char temp = randc & 0x0F;
+  uint8_t temp = randc & 0x0F;
   return temp > 9 ? temp - 7 : temp;
 }

@@ -18,18 +18,41 @@
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
 
+#define TUBE1 0
+#define TUBE2 1
+#define TUBE3 2
+#define TUBE4 3
+#define TUBE5 4
+#define TUBE6 5
+#define TUBE7 6
+#define TUBE8 7
+
 #define ROLL_SECONDS 2
 #define ROLL_INTERVAL_MS 25
-#define DISPLAY_SECONDS 3
+#define ROLL_DISPLAY_SECONDS 3
+
+#define BLINK_DURATION_MS 500
 
 #define ALARM_INT PA1
 
-                    // |  ALL   |       CLOCK         | DIVERGENCE  |   SETTINGS    |
-#define BUTTON1 PA3 // |  MODE  |                     |             |               |
-#define BUTTON2 PA4 // |        | -/DATE              | -/LEFT      | -             |
-#define BUTTON3 PA5 // |        | ROLL                | ROLL        | CONFIRM       |
-#define BUTTON4 PA6 // |        | +/ARM/DISARM ALARM  | +/RIGHT     | +             |
-#define BUTTON5 PA7 // |        | BRIGHTNESS          | BRIGHTNESS  | LAST SETTING  |
+/*                   |  ALL   |       CLOCK         | DIVERGENCE                        |   SETTINGS    | */
+#define BUTTON1 4 // |  MODE  |                     |                                   |               |
+#define BUTTON2 3 // |        | -/DATE              | -/LEFT         --|                | -             |
+#define BUTTON3 2 // |        | ROLL                | ROLL/CONFIRM     |--EDIT MODE     | CONFIRM       |
+#define BUTTON4 1 // |        | +/ARM/DISARM ALARM  | +/RIGHT        --|                | +             |
+#define BUTTON5 0 // |        | BRIGHTNESS          | BRIGHTNESS/BACK                   | LAST SETTING  |
+#define BUTTON1_PIN PA3
+#define BUTTON2_PIN PA4
+#define BUTTON3_PIN PA5
+#define BUTTON4_PIN PA6
+#define BUTTON5_PIN PA7
+
+#define BUTTON_SHORT_PRESS_MIN_DURATION_MS 40
+#define BUTTON_SHORT_PRESS_MAX_DURATION_MS 60
+#define BUTTON_LONG_PRESS_MIN_DURATION_MS 2000
+
+#define DATE_DISPLAY_SECONDS 2
+#define BRIGHTNESS_DISPLAY_MS 250
 
 #define LE PB0
 #define BL PB1
@@ -46,5 +69,7 @@
 #define CLOCK_MODE 0
 #define DIVERGENCE_MODE 1
 #define SETTINGS_MODE 2
+
+#define DIVERGENCE_EDIT_MODE 3
 
 #endif /* CONSTANTS_H_ */

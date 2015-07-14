@@ -20,11 +20,12 @@
  * This is the code that handles the data shifting into the HV5622 Shift Registers.
  */
 
+#include <stdint.h>
 #include <avr/io.h>
 
 #include "../constants.h"
 
-void SRShift(char i) {
+void SRShift(uint8_t i) {
   while (i) {
     PORTB |= (1 << CLK);
     PORTB &= ~(1 << CLK);
@@ -45,13 +46,13 @@ void SROFF() {
   PORTB &= ~(1 << BL);
 }
 
-void SRSendOnes(char i) {
+void SRSendOnes(uint8_t i) {
   PORTB |= (1 << DIN);
   SRShift(i);
   PORTB &= ~(1 << DIN);
 }
 
-void SRSendZeros(char i) {
+void SRSendZeros(uint8_t i) {
   PORTB &= ~(1 << DIN);
   SRShift(i);
 }

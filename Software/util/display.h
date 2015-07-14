@@ -18,11 +18,14 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 
+#include <stdint.h>
+
 typedef struct {
-  char tube1, tube2, tube3, tube4, tube5, tube6, tube7, tube8;
+  uint8_t tube[8];
 } Display;
 
 extern Display display;
+extern Display last_display_state;
 
 void display_init();
 
@@ -32,8 +35,16 @@ void display_on();
 
 void display_off();
 
+void display_showCurrentBrightness();
+
 void display_increaseBrightness();
 
 void display_decreaseBrightness();
+
+void display_toggleBrightness();
+
+void display_saveState();
+
+void display_restoreState();
 
 #endif /* DISPLAY_H_ */

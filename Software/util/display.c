@@ -24,35 +24,43 @@
 
 #include "display.h"
 
+#include <stdint.h>
 #include <avr/io.h>
 #include <avr/pgmspace.h>
+#include <util/delay.h>
 
 #include "../constants.h"
 #include "../settings.h"
 #include "shiftregister.h"
 
-unsigned char brightness;
-const unsigned char brightnessLevels[11] PROGMEM = {0,25,50,75,100,125,150,175,200,225,250};
+uint8_t brightness = 9;
+const uint16_t PROGMEM brightnessLevels[10] = { 25, 50, 75, 100, 125, 150, 175,
+    200, 225, 250 };  //Somehow won't work with uint8_t
 
 Display display;
+Display last_display_state;
+
+void tmr1_init() {
+  TCCR1A |= (1 << COM1A1) | (1 << PWM1A);
+  TCCR1B |= (1 << CS13) | (1 << CS10);  // x512 prescaler
+  TCCR1D &= ~(1 << WGM11) | ~(1 << WGM10);
+}
 
 void display_init() {
   //Clear shift registers
   SRSendZeros(96);
   SRLatch();
-
-  //Setup Timer1 with Fast PWM mode with x1 prescaler
-  TCCR1A |= (1<<COM1A1) | (1<<PWM1A);
-  TCCR1B |= (1<<CS10);
-  brightness = settings.brightness;
-  OCR1A = pgm_read_byte(&(brightnessLevels[brightness]));
-
   display_on();
+  tmr1_init();
+  brightness = settings.default_brightness;
+  OCR1C = 0xFF;
+  OCR1A = pgm_read_word(&(brightnessLevels[brightness]));
+
   display_update();
 }
 
 void handleShiftRegister1() {
-  switch (display.tube6) {
+  switch (display.tube[TUBE6]) {
     case 1:
     case 2:
     case 3:
@@ -71,13 +79,13 @@ void handleShiftRegister1() {
       SRSendZeros(8);
       break;
     default:
-      SRSendZeros(display.tube6 - 4);
+      SRSendZeros(display.tube[TUBE6] - 4);
       SRSendOnes(1);
-      SRSendZeros(11 - display.tube6);
+      SRSendZeros(11 - display.tube[TUBE6]);
       break;
   }
 
-  switch (display.tube7) {
+  switch (display.tube[TUBE7]) {
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -95,13 +103,13 @@ void handleShiftRegister1() {
       SRSendZeros(12);
       break;
     default:
-      SRSendZeros(display.tube7);
+      SRSendZeros(display.tube[TUBE7]);
       SRSendOnes(1);
-      SRSendZeros(11 - display.tube7);
+      SRSendZeros(11 - display.tube[TUBE7]);
       break;
   }
 
-  switch (display.tube8) {
+  switch (display.tube[TUBE8]) {
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -119,20 +127,20 @@ void handleShiftRegister1() {
       SRSendZeros(12);
       break;
     default:
-      SRSendZeros(display.tube8);
+      SRSendZeros(display.tube[TUBE8]);
       SRSendOnes(1);
-      SRSendZeros(11 - display.tube8);
+      SRSendZeros(11 - display.tube[TUBE8]);
       break;
   }
 }
 
 void handleShiftRegister2() {
-  switch (display.tube3) {
+  switch (display.tube[TUBE3]) {
     case 8:
     case 9:
-      SRSendZeros(display.tube3 - 8);
+      SRSendZeros(display.tube[TUBE3] - 8);
       SRSendOnes(1);
-      SRSendZeros(11 - display.tube3);
+      SRSendZeros(11 - display.tube[TUBE3]);
       break;
     case 0:
       SRSendZeros(2);
@@ -151,7 +159,7 @@ void handleShiftRegister2() {
       break;
   }
 
-  switch (display.tube4) {
+  switch (display.tube[TUBE4]) {
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -169,13 +177,13 @@ void handleShiftRegister2() {
       SRSendZeros(12);
       break;
     default:
-      SRSendZeros(display.tube4);
+      SRSendZeros(display.tube[TUBE4]);
       SRSendOnes(1);
-      SRSendZeros(11 - display.tube4);
+      SRSendZeros(11 - display.tube[TUBE4]);
       break;
   }
 
-  switch (display.tube5) {
+  switch (display.tube[TUBE5]) {
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -193,19 +201,19 @@ void handleShiftRegister2() {
       SRSendZeros(12);
       break;
     default:
-      SRSendZeros(display.tube5);
+      SRSendZeros(display.tube[TUBE5]);
       SRSendOnes(1);
-      SRSendZeros(11 - display.tube5);
+      SRSendZeros(11 - display.tube[TUBE5]);
       break;
   }
 
-  switch (display.tube6) {
+  switch (display.tube[TUBE6]) {
     case 1:
     case 2:
     case 3:
-      SRSendZeros(display.tube6);
+      SRSendZeros(display.tube[TUBE6]);
       SRSendOnes(1);
-      SRSendZeros(3 - display.tube6);
+      SRSendZeros(3 - display.tube[TUBE6]);
       break;
     case LDP:
       SRSendOnes(1);
@@ -221,7 +229,7 @@ void handleShiftRegister2() {
 }
 
 void handleShiftRegister3() {
-  switch (display.tube1) {
+  switch (display.tube[TUBE1]) {
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -239,12 +247,12 @@ void handleShiftRegister3() {
       SRSendZeros(12);
       break;
     default:
-      SRSendZeros(display.tube1);
+      SRSendZeros(display.tube[TUBE1]);
       SRSendOnes(1);
-      SRSendZeros(11 - display.tube1);
+      SRSendZeros(11 - display.tube[TUBE1]);
       break;
   }
-  switch (display.tube2) {
+  switch (display.tube[TUBE2]) {
     case 0:
       SRSendZeros(10);
       SRSendOnes(1);
@@ -262,12 +270,12 @@ void handleShiftRegister3() {
       SRSendZeros(12);
       break;
     default:
-      SRSendZeros(display.tube2);
+      SRSendZeros(display.tube[TUBE2]);
       SRSendOnes(1);
-      SRSendZeros(11 - display.tube2);
+      SRSendZeros(11 - display.tube[TUBE2]);
   }
 
-  switch (display.tube3) {
+  switch (display.tube[TUBE3]) {
     case 8:
     case 9:
     case 0:
@@ -282,9 +290,9 @@ void handleShiftRegister3() {
       SRSendZeros(8);
       break;
     default:
-      SRSendZeros(display.tube3);
+      SRSendZeros(display.tube[TUBE3]);
       SRSendOnes(1);
-      SRSendZeros(7 - display.tube3);
+      SRSendZeros(7 - display.tube[TUBE3]);
       break;
   }
 }
@@ -296,26 +304,56 @@ void display_update() {
   SRLatch();
 }
 
-void display_on(){
-  DDRB &= ~(1<<HV_DISABLE);
-  PORTB &= ~(1<<HV_DISABLE);
+void display_on() {
+  DDRB &= ~(1 << HV_DISABLE);
+  PORTB &= ~(1 << HV_DISABLE);
 }
 
-void display_off(){
-  DDRB |= (1<<HV_DISABLE);
-  PORTB |= (1<<HV_DISABLE);
+void display_off() {
+  DDRB |= (1 << HV_DISABLE);
+  PORTB |= (1 << HV_DISABLE);
 }
 
-void display_increaseBrightness(){
-  if(brightness < 10){
+void display_showCurrentBrightness() {
+  display.tube[TUBE1] = BLANK;
+  display.tube[TUBE2] = BLANK;
+  display.tube[TUBE3] = BLANK;
+  display.tube[TUBE4] = 0;
+  display.tube[TUBE5] = brightness;
+  display.tube[TUBE6] = BLANK;
+  display.tube[TUBE7] = BLANK;
+  display.tube[TUBE8] = BLANK;
+  display_update();
+}
+
+void display_increaseBrightness() {
+  if (brightness < 9) {
     brightness++;
-    OCR1A = pgm_read_byte(&(brightnessLevels[brightness]));
+    OCR1A = pgm_read_word(&(brightnessLevels[brightness]));
   }
 }
 
-void display_decreaseBrightness(){
-  if(brightness > 0){
+void display_decreaseBrightness() {
+  if (brightness > 0) {
     brightness--;
-    OCR1A = pgm_read_byte(&(brightnessLevels[brightness]));
+    OCR1A = pgm_read_word(&(brightnessLevels[brightness]));
   }
+}
+
+void display_toggleBrightness() {
+  if (brightness < 9) {
+    brightness++;
+    OCR1A = pgm_read_word(&(brightnessLevels[brightness]));
+  } else {
+    brightness = 0;
+    OCR1A = pgm_read_word(&(brightnessLevels[brightness]));
+  }
+}
+
+void display_saveState() {
+  last_display_state = display;
+}
+
+void display_restoreState() {
+  display = last_display_state;
 }

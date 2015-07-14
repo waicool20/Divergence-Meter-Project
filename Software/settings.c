@@ -22,22 +22,24 @@
 
 #include "settings.h"
 
+#include <stdint.h>
 #include <avr/eeprom.h>
 
 #include "constants.h"
 #include "i2cmaster.h"
 #include "util/display.h"
 
-#define DEFAULT_BRIGHTNESS 9
-unsigned char brightness EEMEM = DEFAULT_BRIGHTNESS;
-unsigned char date_format EEMEM = 0;
+uint8_t EEMEM default_brightness = 9;
+uint8_t EEMEM date_format  = 0;
+uint8_t EEMEM formats = 0x01;
 
 Settings settings;
 
 void settings_init(){
   settings_readDS3232();
-  settings.brightness = eeprom_read_byte(&brightness);
+  settings.default_brightness = eeprom_read_byte(&default_brightness);
   settings.date_format = eeprom_read_byte(&date_format);
+  settings.formats = eeprom_read_byte(&formats);
 }
 
 void settings_readDS3232() {
@@ -55,35 +57,45 @@ void settings_readDS3232() {
   settings.alarm1_seconds = i2c_readAck();
   settings.alarm1_minutes = i2c_readAck();
   settings.alarm1_hours = i2c_readAck();
-  settings.alarm1_date = i2c_readAck();
+  settings.alarm1_day_date = i2c_readAck();
 
   settings.alarm2_minutes = i2c_readAck();
   settings.alarm2_hours = i2c_readAck();
-  settings.alarm2_date = i2c_readAck();
+  settings.alarm2_day_date = i2c_readAck();
   i2c_stop();
 }
 
-void settings_writeDS3232(){
+void settings_writeTimeDS3232(){
   i2c_start_wait(DS3232 + I2C_WRITE);
   i2c_write(0x00);
 
-  i2c_write(settings.seconds);
-  i2c_write(settings.minutes);
-  i2c_write(settings.hours);
-  i2c_write(settings.day);
-  i2c_write(settings.date);
-  i2c_write(settings.month);
-  i2c_write(settings.year);
+  i2c_write(settings.seconds); //00h
+  i2c_write(settings.minutes); //01h
+  i2c_write(settings.hours | ((settings.formats & 0x01)<<6)); //02h
+  i2c_write(settings.day); //03h
+  i2c_write(settings.date); //04h
+  i2c_write(settings.month); //05h
+  i2c_write(settings.year); //06h
+  i2c_stop();
+}
 
-  i2c_write(settings.alarm1_seconds);
-  i2c_write(settings.alarm1_minutes);
-  i2c_write(settings.alarm1_hours);
-  i2c_write(settings.alarm1_day);
-  i2c_write(settings.alarm1_date);
+void settings_writeAlarm1DS3232(){
+  i2c_start_wait(DS3232 + I2C_WRITE);
+  i2c_write(0x07);
 
-  i2c_write(settings.alarm2_minutes);
-  i2c_write(settings.alarm2_hours);
-  i2c_write(settings.alarm2_day);
-  i2c_write(settings.alarm2_date);
+  i2c_write(settings.alarm1_seconds); //07h
+  i2c_write(settings.alarm1_minutes); //08h
+  i2c_write(settings.alarm1_hours); //09h
+  i2c_write(settings.alarm1_day_date); //Ah
+  i2c_stop();
+}
+
+void settings_writeAlarm2DS3232(){
+  i2c_start_wait(DS3232 + I2C_WRITE);
+  i2c_write(0x0B);
+
+  i2c_write(settings.alarm2_minutes); //Bh
+  i2c_write(settings.alarm2_hours); //Ch
+  i2c_write(settings.alarm2_day_date); //Dh
   i2c_stop();
 }
