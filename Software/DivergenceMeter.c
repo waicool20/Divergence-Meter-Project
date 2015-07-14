@@ -197,6 +197,7 @@ uint8_t currentTube = 0;
 
 void DivergenceMeter_DivergenceEditMode() {
   if (just_entered_mode[DIVERGENCE_EDIT_MODE]) {
+    currentTube = 0;
     just_entered_mode[DIVERGENCE_EDIT_MODE] = false;
     display.tube[TUBE1] = 0;
     display.tube[TUBE2] = BLANK;
