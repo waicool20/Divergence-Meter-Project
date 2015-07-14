@@ -243,10 +243,10 @@ void DivergenceMeter_clockMode() {
 void DivergenceMeter_displayCurrentTime() {
   display.tube[TUBE1] = (settings.hours >> 4) & 0x01;
   display.tube[TUBE2] = settings.hours & 0x0F;
-
+  display.tube[TUBE3] = (settings.seconds & 0x01) ? LDP : RDP;
   display.tube[TUBE4] = (settings.minutes >> 4);
   display.tube[TUBE5] = settings.minutes & 0x0F;
-
+  display.tube[TUBE6] = (settings.seconds & 0x01) ? LDP : RDP;
   display.tube[TUBE7] = (settings.seconds >> 4);
   display.tube[TUBE8] = settings.seconds & 0x0F;
   display_update();
