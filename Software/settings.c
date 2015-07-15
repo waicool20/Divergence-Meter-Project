@@ -29,7 +29,7 @@
 #include "i2cmaster.h"
 #include "util/display.h"
 
-uint8_t EEMEM default_brightness = 9;
+uint8_t EEMEM default_brightness = 5;
 uint8_t EEMEM date_format  = 0;
 uint8_t EEMEM formats = 0x01;
 

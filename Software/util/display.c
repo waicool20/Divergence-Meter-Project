@@ -33,7 +33,7 @@
 #include "../settings.h"
 #include "shiftregister.h"
 
-uint8_t brightness = 9;
+uint8_t brightness;
 const uint16_t PROGMEM brightnessLevels[10] = { 25, 50, 75, 100, 125, 150, 175,
     200, 225, 250 };  //Somehow won't work with uint8_t
 
