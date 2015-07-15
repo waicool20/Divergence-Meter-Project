@@ -35,12 +35,13 @@
 
 #define ALARM_INT PA1
 
-/*                   |  ALL   |       CLOCK         | DIVERGENCE                        |   SETTINGS    | */
-#define BUTTON1 4 // |  MODE  |                     |                                   |               |
-#define BUTTON2 3 // |        | -/DATE              | -/LEFT         --|                | -             |
-#define BUTTON3 2 // |        | ROLL                | ROLL/CONFIRM     |--EDIT MODE     | CONFIRM       |
-#define BUTTON4 1 // |        | +/ARM/DISARM ALARM  | +/RIGHT        --|                | +             |
-#define BUTTON5 0 // |        | BRIGHTNESS          | BRIGHTNESS/BACK                   | LAST SETTING  |
+/* LP: Long Press                                                                                                         */
+/*                   |  ALL   |       CLOCK                         | DIVERGENCE                        |   SETTINGS    | */
+#define BUTTON1 4 // |  MODE  |                                     |                                   |               |
+#define BUTTON2 3 // |        | -/DATE                              | -/Prev        --|--EDIT MODE      | -             |
+#define BUTTON3 2 // |        | +/ARM/DISARM ALARM/ LP:Edit Alarm   | +/Next        --|                 | +             |
+#define BUTTON4 1 // |        | ROLL/CONFIRM                        | ROLL/CONFIRM                      | CONFIRM       |
+#define BUTTON5 0 // |        | BRIGHTNESS/BACK                     | BRIGHTNESS/BACK                   | Back          |
 #define BUTTON1_PIN PA3
 #define BUTTON2_PIN PA4
 #define BUTTON3_PIN PA5

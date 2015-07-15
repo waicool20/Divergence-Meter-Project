@@ -227,11 +227,11 @@ void DivergenceMeter_clockMode() {
   if (button_short_pressed[BUTTON2] || button_long_pressed[BUTTON2]) {
     DivergenceMeter_displayCurrentDate();
     _delay_ms((DATE_DISPLAY_SECONDS * 1000));
-  } else if (button_short_pressed[BUTTON3] || button_long_pressed[BUTTON3]) {
+  } else if (button_short_pressed[BUTTON3]) {
+
+  } else if (button_short_pressed[BUTTON4] || button_long_pressed[BUTTON4]) {
     shouldRoll = true;
     DivergenceMeter_rollWorldLineWithDelay(true);
-  } else if (button_short_pressed[BUTTON4]) {
-
   } else if (button_short_pressed[BUTTON5] || button_long_pressed[BUTTON5]) {
     display_toggleBrightness();
     display_showCurrentBrightness();
@@ -270,17 +270,17 @@ void DivergenceMeter_divergenceMode() {
   if (just_entered_mode[DIVERGENCE_MODE]) {
     DivergenceMeter_rollWorldLineWithDelay(true);
   }
-  if (button_short_pressed[BUTTON2] && button_short_pressed[BUTTON4]) {
+  if (button_short_pressed[BUTTON2] && button_short_pressed[BUTTON3]) {
     current_mode = DIVERGENCE_EDIT_MODE;
     just_entered_mode[DIVERGENCE_EDIT_MODE] = true;
   } else if (button_short_pressed[BUTTON2]) {
     DivergenceMeter_rollWorldLine(true);
     DivergenceMeter_showPrevWorldLine();
     _delay_ms(200);
-  } else if (button_short_pressed[BUTTON3] || button_long_pressed[BUTTON3]) {
+  } else if (button_short_pressed[BUTTON4] || button_long_pressed[BUTTON4]) {
     shouldRoll = true;
     DivergenceMeter_rollWorldLine(true);
-  } else if (button_short_pressed[BUTTON4]) {
+  } else if (button_short_pressed[BUTTON3]) {
     DivergenceMeter_rollWorldLine(true);
     DivergenceMeter_showNextWorldLine();
     _delay_ms(200);
@@ -342,7 +342,7 @@ void DivergenceMeter_divergenceEditMode() {
     display_update();
   }
 
-  if (button_short_pressed[BUTTON3]) {
+  if (button_short_pressed[BUTTON4]) {
     if (currentTube < 7) {
       if (currentTube == TUBE1) {
         display.tube[TUBE2] = RDP;
@@ -381,7 +381,7 @@ void DivergenceMeter_divergenceEditMode() {
     }
     display_update();
     _delay_ms(200);
-  } else if (button_short_pressed[BUTTON4]) {
+  } else if (button_short_pressed[BUTTON3]) {
     if (display.tube[currentTube] < 9) {
       display.tube[currentTube]++;
 
