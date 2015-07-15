@@ -162,7 +162,7 @@ void DivergenceMeter_init() {
   display_init();
 }
 
-/* Timer0 Interrupt Code, runned every 10ms as configured*/
+/* Timer0 Interrupt Code, ran every 10ms as configured*/
 
 ISR(TIMER0_COMPA_vect) {
   for (int i = 4; i >= 0; i--) {
@@ -355,6 +355,10 @@ void DivergenceMeter_divergenceEditMode() {
     } else {
       currentTube = 0;
       current_mode = DIVERGENCE_MODE;
+      display_saveState();
+      DivergenceMeter_rollWorldLine(false);
+      display_restoreState();
+      display_update();
     }
     _delay_ms(200);
   } else if (button_short_pressed[BUTTON5]){
