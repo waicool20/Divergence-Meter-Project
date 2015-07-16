@@ -145,11 +145,10 @@ void ADC_init() {
 
 void DivergenceMeter_init() {
   //Initialize IO
-  DDRA &= ~(1 << ALARM_INT) | ~(1 << BUTTON1_PIN) | ~(1 << BUTTON2_PIN)
-      | ~(1 << BUTTON3_PIN) | ~(1 << BUTTON4_PIN) | ~(1 << BUTTON5_PIN);
+  DDRA &= ~((1 << ALARM_INT) | (1 << BUTTON1_PIN) | (1 << BUTTON2_PIN)
+      | (1 << BUTTON3_PIN) | (1 << BUTTON4_PIN) | (1 << BUTTON5_PIN));
   DDRB = (1 << LE) | (1 << BL) | (1 << CLK) | (1 << DIN) | (1 << SPEAKER);
   MCUCR = (1 << PUD);
-  PORTB = 0x00;
 
   //Global interrupt enable
   sei();
@@ -174,14 +173,16 @@ ISR(TIMER0_COMPA_vect) {
       button_short_pressed[i] = false;
       button_long_pressed[i] = false;
     }
-    if (button_count[i] >= (BUTTON_LONG_PRESS_MIN_DURATION_MS / 10)) {
+
+    if (button_count[i] > (BUTTON_LONG_PRESS_MIN_DURATION_MS / 10)) {
       button_is_pressed[i] = true;
       button_short_pressed[i] = false;
       button_long_pressed[i] = true;
-    }
-    if (button_count[i] > (BUTTON_SHORT_PRESS_MIN_DURATION_MS / 10)
-        && button_count[i] <= (BUTTON_SHORT_PRESS_MAX_DURATION_MS / 10)
-        && !button_long_pressed[i]) {
+    } else if (button_count[i] > (BUTTON_SHORT_PRESS_MAX_DURATION_MS / 10)){
+      button_is_pressed[i] = true;
+      button_short_pressed[i] = false;
+      button_long_pressed[i] = false;
+    } else if (button_count[i] >= (BUTTON_SHORT_PRESS_MIN_DURATION_MS / 10)) {
       button_is_pressed[i] = true;
       button_short_pressed[i] = true;
       button_long_pressed[i] = false;
@@ -191,8 +192,7 @@ ISR(TIMER0_COMPA_vect) {
     }
   }
 
-  if ((button_short_pressed[BUTTON1] || button_long_pressed[BUTTON1])
-      && button_time_since_last_pressed[BUTTON1] > 10) {
+  if (button_short_pressed[BUTTON1] && button_time_since_last_pressed[BUTTON1] > 10) {
     if (current_mode < SETTINGS_MODE) {
       current_mode++;
     } else {
@@ -224,15 +224,15 @@ void DivergenceMeter_clockMode() {
       _delay_ms((DATE_DISPLAY_SECONDS * 1000));
       break;
   }
-  if (button_short_pressed[BUTTON2] || button_long_pressed[BUTTON2]) {
+  if (button_is_pressed[BUTTON2]) {
     DivergenceMeter_displayCurrentDate();
     _delay_ms((DATE_DISPLAY_SECONDS * 1000));
   } else if (button_short_pressed[BUTTON3]) {
 
-  } else if (button_short_pressed[BUTTON4] || button_long_pressed[BUTTON4]) {
+  } else if (button_is_pressed[BUTTON4]) {
     shouldRoll = true;
     DivergenceMeter_rollWorldLineWithDelay(true);
-  } else if (button_short_pressed[BUTTON5] || button_long_pressed[BUTTON5]) {
+  } else if (button_is_pressed[BUTTON5]) {
     display_toggleBrightness();
     display_showCurrentBrightness();
     _delay_ms(BRIGHTNESS_DISPLAY_MS);
@@ -270,21 +270,21 @@ void DivergenceMeter_divergenceMode() {
   if (just_entered_mode[DIVERGENCE_MODE]) {
     DivergenceMeter_rollWorldLineWithDelay(true);
   }
-  if (button_short_pressed[BUTTON2] && button_short_pressed[BUTTON3]) {
+  if (button_long_pressed[BUTTON2] && button_long_pressed[BUTTON3]) {
     current_mode = DIVERGENCE_EDIT_MODE;
     just_entered_mode[DIVERGENCE_EDIT_MODE] = true;
   } else if (button_short_pressed[BUTTON2]) {
     DivergenceMeter_rollWorldLine(true);
     DivergenceMeter_showPrevWorldLine();
     _delay_ms(200);
-  } else if (button_short_pressed[BUTTON4] || button_long_pressed[BUTTON4]) {
-    shouldRoll = true;
-    DivergenceMeter_rollWorldLine(true);
   } else if (button_short_pressed[BUTTON3]) {
     DivergenceMeter_rollWorldLine(true);
     DivergenceMeter_showNextWorldLine();
     _delay_ms(200);
-  } else if (button_short_pressed[BUTTON5] || button_long_pressed[BUTTON5]) {
+  } else if (button_is_pressed[BUTTON4]) {
+    shouldRoll = true;
+    DivergenceMeter_rollWorldLine(true);
+  } else if (button_is_pressed[BUTTON5]) {
     display_saveState();
     display_toggleBrightness();
     display_showCurrentBrightness();
@@ -342,6 +342,24 @@ void DivergenceMeter_divergenceEditMode() {
     display_update();
   }
 
+  if (button_is_pressed[BUTTON2]) {
+    if (display.tube[currentTube] == BLANK) {
+      display.tube[currentTube] = 9;
+    } else if (display.tube[currentTube] > 0) {
+      display.tube[currentTube]--;
+    }
+    display_update();
+    _delay_ms(200);
+  } else if (button_is_pressed[BUTTON3]) {
+    if (display.tube[currentTube] < 9) {
+      display.tube[currentTube]++;
+    } else if (display.tube[currentTube] == 9) {
+      display.tube[currentTube] = BLANK;
+    }
+    display_update();
+    _delay_ms(200);
+  }
+
   if (button_short_pressed[BUTTON4]) {
     if (currentTube < 7) {
       if (currentTube == TUBE1) {
@@ -371,24 +389,6 @@ void DivergenceMeter_divergenceEditMode() {
       }
       display_update();
     }
-    _delay_ms(200);
-  }
-  if (button_short_pressed[BUTTON2]) {
-    if (display.tube[currentTube] == BLANK) {
-      display.tube[currentTube] = 9;
-    } else if (display.tube[currentTube] > 0) {
-      display.tube[currentTube]--;
-    }
-    display_update();
-    _delay_ms(200);
-  } else if (button_short_pressed[BUTTON3]) {
-    if (display.tube[currentTube] < 9) {
-      display.tube[currentTube]++;
-
-    } else if (display.tube[currentTube] == 9) {
-      display.tube[currentTube] = BLANK;
-    }
-    display_update();
     _delay_ms(200);
   }
 }
