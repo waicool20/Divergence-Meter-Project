@@ -76,6 +76,7 @@ void DivergenceMeter_settingsMode();
 
 void DivergenceMeter_rollWorldLine(bool rollTube2);
 void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2);
+void DivergenceMeter_showBrightness();
 
 /* Volatile Variables (Modifiable by ISR)*/
 
@@ -237,12 +238,10 @@ void DivergenceMeter_clockMode() {
   } else if (button_short_pressed[BUTTON5]) {
     display_adaptiveBrightnessOff();
     display_toggleBrightness();
-    display_showCurrentBrightness();
-    _delay_ms(BRIGHTNESS_DISPLAY_MS);
+    DivergenceMeter_showBrightness();
   } else if (button_long_pressed[BUTTON5]  && !settings.adaptive_brightness){
     display_adaptiveBrightnessOn();
-    display_showCurrentBrightness();
-    _delay_ms(BRIGHTNESS_DISPLAY_MS);
+    DivergenceMeter_showBrightness();
   }
   just_entered_mode[CLOCK_MODE] = false;
 }
@@ -293,19 +292,11 @@ void DivergenceMeter_divergenceMode() {
     DivergenceMeter_rollWorldLine(true);
   } else if (button_short_pressed[BUTTON5]) {
     display_adaptiveBrightnessOff();
-    display_saveState();
     display_toggleBrightness();
-    display_showCurrentBrightness();
-    _delay_ms(BRIGHTNESS_DISPLAY_MS);
-    display_restoreState();
-    display_update();
+    DivergenceMeter_showBrightness();
   } else if (button_long_pressed[BUTTON5] && !settings.adaptive_brightness){
-    display_saveState();
     display_adaptiveBrightnessOn();
-    display_showCurrentBrightness();
-    _delay_ms(BRIGHTNESS_DISPLAY_MS);
-    display_restoreState();
-    display_update();
+    DivergenceMeter_showBrightness();
   }
   just_entered_mode[DIVERGENCE_MODE] = false;
 }
@@ -467,4 +458,12 @@ void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2) {
     }
     _delay_ms(10);
   }
+}
+
+void DivergenceMeter_showBrightness() {
+  display_saveState();
+  display_showCurrentBrightness();
+  _delay_ms(BRIGHTNESS_DISPLAY_MS);
+  display_restoreState();
+  display_update();
 }
