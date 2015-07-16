@@ -87,7 +87,6 @@ volatile uint16_t button_count[5] = { 0, 0, 0, 0, 0 };
 volatile bool button_is_pressed[5] = { false, false, false, false, false };
 volatile bool button_short_pressed[5] = { false, false, false, false, false };
 volatile bool button_long_pressed[5] = { false, false, false, false, false };
-volatile uint8_t button_time_since_last_pressed[5] = { 0, 0, 0, 0, 0 };
 
 /* Normal Variables */
 
@@ -187,20 +186,19 @@ ISR(TIMER0_COMPA_vect) {
       button_short_pressed[i] = true;
       button_long_pressed[i] = false;
     }
-    if (button_time_since_last_pressed[i] < 255) {
-      button_time_since_last_pressed[i]++;
-    }
   }
 
-  if (button_short_pressed[BUTTON1] && button_time_since_last_pressed[BUTTON1] > 10) {
-    if (current_mode < SETTINGS_MODE) {
+  if (button_short_pressed[BUTTON1]) {
+    if (current_mode < DIVERGENCE_MODE) {
       current_mode++;
     } else {
-      current_mode = 0;
+      current_mode = CLOCK_MODE;
     }
     _delay_ms(200);
     just_entered_mode[current_mode] = true;
-    button_time_since_last_pressed[BUTTON1] = 0;
+  } else if (button_long_pressed[BUTTON1] && current_mode != SETTINGS_MODE){
+    current_mode = SETTINGS_MODE;
+    just_entered_mode[current_mode] = true;
   }
   clockCount++;
   if(clockCount > 9){
@@ -396,15 +394,18 @@ void DivergenceMeter_divergenceEditMode() {
 /* Settings Mode Code */
 
 void DivergenceMeter_settingsMode() {
-  display.tube[TUBE1] = 1;
-  display.tube[TUBE2] = 2;
-  display.tube[TUBE3] = 3;
-  display.tube[TUBE4] = 4;
-  display.tube[TUBE5] = 5;
-  display.tube[TUBE6] = 6;
-  display.tube[TUBE7] = 7;
-  display.tube[TUBE8] = 8;
-  display_update();
+  if(just_entered_mode[SETTINGS_MODE]){
+    display.tube[TUBE1] = 1;
+    display.tube[TUBE2] = 2;
+    display.tube[TUBE3] = 3;
+    display.tube[TUBE4] = 4;
+    display.tube[TUBE5] = 5;
+    display.tube[TUBE6] = 6;
+    display.tube[TUBE7] = 7;
+    display.tube[TUBE8] = 8;
+    display_update();
+    just_entered_mode[SETTINGS_MODE] = false;
+  }
 }
 
 /* Misc Code */
