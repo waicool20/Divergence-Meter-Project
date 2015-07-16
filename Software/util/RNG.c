@@ -34,8 +34,8 @@ uint8_t randx;
 
 void RNG_init() {
   randa = ADCH;  //Seed with value from LDR
-  randb = settings.seconds;  //Seed with current second
-  randc = settings.minutes;  //Seed with current minute
+  randb = settings.time[SECONDS];  //Seed with current second
+  randc = settings.time[MINUTES];  //Seed with current minute
   randx = 1;
 }
 

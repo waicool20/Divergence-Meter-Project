@@ -69,8 +69,10 @@
 
 #define CLOCK_MODE 0
 #define DIVERGENCE_MODE 1
-#define SETTINGS_MODE 2
 
+#define SETTINGS_MODE 2
 #define DIVERGENCE_EDIT_MODE 3
+#define ALARM_SET_MODE 4
+#define CLOCK_SET_MODE 5
 
 #endif /* CONSTANTS_H_ */

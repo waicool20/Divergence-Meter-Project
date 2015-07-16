@@ -52,7 +52,7 @@ void display_init() {
   SRLatch();
   display_on();
   tmr1_init();
-  brightness = settings.default_brightness;
+  brightness = settings.defaults[ADAPTIVE_BRIGHTNESS_ON];
   OCR1C = 0xFF;
   OCR1A = pgm_read_word(&(brightnessLevels[brightness]));
 
@@ -211,8 +211,8 @@ void display_showCurrentBrightness() {
   display.tube[TUBE1] = BLANK;
   display.tube[TUBE2] = BLANK;
   display.tube[TUBE3] = BLANK;
-  display.tube[TUBE4] = settings.adaptive_brightness ? 9 : 0;
-  display.tube[TUBE5] = settings.adaptive_brightness ? 9 : brightness;
+  display.tube[TUBE4] = settings.defaults[ADAPTIVE_BRIGHTNESS_ON] ? 9 : 0;
+  display.tube[TUBE5] = settings.defaults[ADAPTIVE_BRIGHTNESS_ON] ? 9 : brightness;
   display.tube[TUBE6] = BLANK;
   display.tube[TUBE7] = BLANK;
   display.tube[TUBE8] = BLANK;
@@ -220,11 +220,11 @@ void display_showCurrentBrightness() {
 }
 
 void display_adaptiveBrightnessOn(){
-  settings.adaptive_brightness = 1;
+  settings.defaults[ADAPTIVE_BRIGHTNESS_ON] = 1;
 }
 
 void display_adaptiveBrightnessOff(){
-  settings.adaptive_brightness = 0;
+  settings.defaults[ADAPTIVE_BRIGHTNESS_ON] = 0;
 }
 
 void display_updateAdaptiveBrightness(){

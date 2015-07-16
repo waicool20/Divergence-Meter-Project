@@ -20,31 +20,39 @@
 
 #include <stdint.h>
 
-#define TIME_FORMAT_24H 0
-#define DATE_FORMAT_DD_MM 1
+#define SECONDS 0
+#define MINUTES 1
+#define HOURS 2
+#define DAY_OF_WEEK 3
+#define DATE 4
+#define MONTH 5
+#define YEAR 6
+
+#define ALARM1_SECONDS 0
+#define ALARM1_MINUTES 1
+#define ALARM1_HOURS 2
+#define ALARM1_DAY_DATE 3
+
+#define ALARM2_MINUTES 4
+#define ALARM2_HOURS 5
+#define ALARM2_DAY 6
+#define ALARM2_DAY_DATE 7
+
+#define DEFAULT_BRIGHTNESS 0
+#define ADAPTIVE_BRIGHTNESS_ON 1
+#define TIME_FORMAT_24H 2
+#define DATE_FORMAT_DD_MM 3
+
+#define REST_ON_HOUR 0
+#define REST_ON_MINUTE 1
+#define WAKE_ON_HOUR 2
+#define WAKE_ON_MINUTE 3
 
 typedef struct {
-  uint8_t seconds;
-  uint8_t minutes;
-  uint8_t hours;
-  uint8_t day;
-  uint8_t date;
-  uint8_t month;
-  uint8_t year;
-
-  uint8_t alarm1_seconds;
-  uint8_t alarm1_minutes;
-  uint8_t alarm1_hours;
-  uint8_t alarm1_day_date;
-
-  uint8_t alarm2_minutes;
-  uint8_t alarm2_hours;
-  uint8_t alarm2_day;
-  uint8_t alarm2_day_date;
-
-  uint8_t default_brightness;
-	uint8_t adaptive_brightness;
-	uint8_t formats;
+  uint8_t time[7];
+  uint8_t alarm[8];
+  uint8_t defaults[4];
+  uint8_t external[4];
 } Settings;
 
 extern Settings settings;
@@ -52,6 +60,14 @@ extern Settings settings;
 void settings_init();
 
 void settings_readDS3232();
+
+void settings_readTimeDS3232();
+
+void settings_readAlarm1DS3232();
+
+void settings_readAlarm2DS3232();
+
+void settings_writeDS3232();
 
 void settings_writeTimeDS3232();
 

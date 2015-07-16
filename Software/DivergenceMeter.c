@@ -202,12 +202,12 @@ ISR(TIMER0_COMPA_vect) {
     current_mode = SETTINGS_MODE;
     just_entered_mode[current_mode] = true;
   }
-  if(settings.adaptive_brightness){
+  if(settings.defaults[ADAPTIVE_BRIGHTNESS_ON]){
     display_updateAdaptiveBrightness();
   }
   clockCount++;
   if(clockCount > 9){
-    settings_readDS3232();
+    settings_readTimeDS3232();
     clockCount = 0;
   }
   TCNT0H = 0x00;
@@ -218,7 +218,7 @@ ISR(TIMER0_COMPA_vect) {
 
 void DivergenceMeter_clockMode() {
   DivergenceMeter_displayCurrentTime();
-  switch (settings.seconds){
+  switch (settings.time[SECONDS]){
     case 0x00:
       shouldRoll = true;
       DivergenceMeter_rollWorldLine(false);
@@ -239,7 +239,7 @@ void DivergenceMeter_clockMode() {
     display_adaptiveBrightnessOff();
     display_toggleBrightness();
     DivergenceMeter_showBrightness();
-  } else if (button_long_pressed[BUTTON5]  && !settings.adaptive_brightness){
+  } else if (button_long_pressed[BUTTON5]  && !settings.defaults[ADAPTIVE_BRIGHTNESS_ON]){
     display_adaptiveBrightnessOn();
     DivergenceMeter_showBrightness();
   }
@@ -247,26 +247,26 @@ void DivergenceMeter_clockMode() {
 }
 
 void DivergenceMeter_displayCurrentTime() {
-  display.tube[TUBE1] = (settings.hours >> 4) & 0x01;
-  display.tube[TUBE2] = settings.hours & 0x0F;
-  display.tube[TUBE3] = (settings.seconds & 0x01) ? LDP : RDP;
-  display.tube[TUBE4] = (settings.minutes >> 4);
-  display.tube[TUBE5] = settings.minutes & 0x0F;
-  display.tube[TUBE6] = (settings.seconds & 0x01) ? LDP : RDP;
-  display.tube[TUBE7] = (settings.seconds >> 4);
-  display.tube[TUBE8] = settings.seconds & 0x0F;
+  display.tube[TUBE1] = (settings.time[HOURS] >> 4) & 0x01;
+  display.tube[TUBE2] = settings.time[HOURS] & 0x0F;
+  display.tube[TUBE3] = (settings.time[SECONDS] & 0x01) ? LDP : RDP;
+  display.tube[TUBE4] = (settings.time[MINUTES] >> 4);
+  display.tube[TUBE5] = settings.time[MINUTES] & 0x0F;
+  display.tube[TUBE6] = (settings.time[SECONDS] & 0x01) ? LDP : RDP;
+  display.tube[TUBE7] = (settings.time[SECONDS] >> 4);
+  display.tube[TUBE8] = settings.time[SECONDS] & 0x0F;
   display_update();
 }
 
 void DivergenceMeter_displayCurrentDate() {
-  display.tube[TUBE1] = (settings.date >> 4) & 0x03;
-  display.tube[TUBE2] = settings.date & 0x0F;
+  display.tube[TUBE1] = (settings.time[DATE] >> 4) & 0x03;
+  display.tube[TUBE2] = settings.time[DATE] & 0x0F;
   display.tube[TUBE3] = LDP;
-  display.tube[TUBE4] = (settings.month >> 4) & 0x01;
-  display.tube[TUBE5] = settings.month & 0x0F;
+  display.tube[TUBE4] = (settings.time[MONTH] >> 4) & 0x01;
+  display.tube[TUBE5] = settings.time[MONTH] & 0x0F;
   display.tube[TUBE3] = RDP;
-  display.tube[TUBE7] = (settings.year >> 4);
-  display.tube[TUBE8] = settings.year & 0x0F;
+  display.tube[TUBE7] = (settings.time[YEAR] >> 4);
+  display.tube[TUBE8] = settings.time[YEAR] & 0x0F;
   display_update();
 }
 
@@ -294,7 +294,7 @@ void DivergenceMeter_divergenceMode() {
     display_adaptiveBrightnessOff();
     display_toggleBrightness();
     DivergenceMeter_showBrightness();
-  } else if (button_long_pressed[BUTTON5] && !settings.adaptive_brightness){
+  } else if (button_long_pressed[BUTTON5] && !settings.defaults[ADAPTIVE_BRIGHTNESS_ON]){
     display_adaptiveBrightnessOn();
     DivergenceMeter_showBrightness();
   }
