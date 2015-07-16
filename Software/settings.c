@@ -101,7 +101,7 @@ void settings_writeTimeDS3232(){
 
   i2c_write(settings.time[SECONDS]); //00h
   i2c_write(settings.time[MINUTES]); //01h
-  i2c_write(settings.time[HOURS] | (settings.defaults[TIME_FORMAT_24H]<<6)); //02h
+  i2c_write(settings.time[HOURS]); //02h
   i2c_write(settings.time[DAY_OF_WEEK]); //03h
   i2c_write(settings.time[DATE]); //04h
   i2c_write(settings.time[MONTH]); //05h
