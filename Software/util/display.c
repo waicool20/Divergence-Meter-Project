@@ -59,6 +59,32 @@ void display_init() {
   display_update();
 }
 
+void handleGenericTube(uint8_t tube){
+  switch (display.tube[tube]) {
+    case 0:
+      SRSendZeros(10);
+      SRSendOnes(1);
+      SRSendZeros(1);
+      break;
+    case RDP:
+      SRSendZeros(11);
+      SRSendOnes(1);
+      break;
+    case LDP:
+      SRSendOnes(1);
+      SRSendZeros(11);
+      break;
+    case BLANK:
+      SRSendZeros(12);
+      break;
+    default:
+      SRSendZeros(display.tube[tube]);
+      SRSendOnes(1);
+      SRSendZeros(11 - display.tube[tube]);
+      break;
+  }
+}
+
 void handleShiftRegister1() {
   switch (display.tube[TUBE6]) {
     case 1:
@@ -85,53 +111,8 @@ void handleShiftRegister1() {
       break;
   }
 
-  switch (display.tube[TUBE7]) {
-    case 0:
-      SRSendZeros(10);
-      SRSendOnes(1);
-      SRSendZeros(1);
-      break;
-    case RDP:
-      SRSendZeros(11);
-      SRSendOnes(1);
-      break;
-    case LDP:
-      SRSendOnes(1);
-      SRSendZeros(11);
-      break;
-    case BLANK:
-      SRSendZeros(12);
-      break;
-    default:
-      SRSendZeros(display.tube[TUBE7]);
-      SRSendOnes(1);
-      SRSendZeros(11 - display.tube[TUBE7]);
-      break;
-  }
-
-  switch (display.tube[TUBE8]) {
-    case 0:
-      SRSendZeros(10);
-      SRSendOnes(1);
-      SRSendZeros(1);
-      break;
-    case RDP:
-      SRSendZeros(11);
-      SRSendOnes(1);
-      break;
-    case LDP:
-      SRSendOnes(1);
-      SRSendZeros(11);
-      break;
-    case BLANK:
-      SRSendZeros(12);
-      break;
-    default:
-      SRSendZeros(display.tube[TUBE8]);
-      SRSendOnes(1);
-      SRSendZeros(11 - display.tube[TUBE8]);
-      break;
-  }
+  handleGenericTube(TUBE7);
+  handleGenericTube(TUBE8);
 }
 
 void handleShiftRegister2() {
@@ -159,53 +140,8 @@ void handleShiftRegister2() {
       break;
   }
 
-  switch (display.tube[TUBE4]) {
-    case 0:
-      SRSendZeros(10);
-      SRSendOnes(1);
-      SRSendZeros(1);
-      break;
-    case RDP:
-      SRSendZeros(11);
-      SRSendOnes(1);
-      break;
-    case LDP:
-      SRSendOnes(1);
-      SRSendZeros(11);
-      break;
-    case BLANK:
-      SRSendZeros(12);
-      break;
-    default:
-      SRSendZeros(display.tube[TUBE4]);
-      SRSendOnes(1);
-      SRSendZeros(11 - display.tube[TUBE4]);
-      break;
-  }
-
-  switch (display.tube[TUBE5]) {
-    case 0:
-      SRSendZeros(10);
-      SRSendOnes(1);
-      SRSendZeros(1);
-      break;
-    case RDP:
-      SRSendZeros(11);
-      SRSendOnes(1);
-      break;
-    case LDP:
-      SRSendOnes(1);
-      SRSendZeros(11);
-      break;
-    case BLANK:
-      SRSendZeros(12);
-      break;
-    default:
-      SRSendZeros(display.tube[TUBE5]);
-      SRSendOnes(1);
-      SRSendZeros(11 - display.tube[TUBE5]);
-      break;
-  }
+  handleGenericTube(TUBE4);
+  handleGenericTube(TUBE5);
 
   switch (display.tube[TUBE6]) {
     case 1:
@@ -229,51 +165,8 @@ void handleShiftRegister2() {
 }
 
 void handleShiftRegister3() {
-  switch (display.tube[TUBE1]) {
-    case 0:
-      SRSendZeros(10);
-      SRSendOnes(1);
-      SRSendZeros(1);
-      break;
-    case RDP:
-      SRSendZeros(11);
-      SRSendOnes(1);
-      break;
-    case LDP:
-      SRSendOnes(1);
-      SRSendZeros(11);
-      break;
-    case BLANK:
-      SRSendZeros(12);
-      break;
-    default:
-      SRSendZeros(display.tube[TUBE1]);
-      SRSendOnes(1);
-      SRSendZeros(11 - display.tube[TUBE1]);
-      break;
-  }
-  switch (display.tube[TUBE2]) {
-    case 0:
-      SRSendZeros(10);
-      SRSendOnes(1);
-      SRSendZeros(1);
-      break;
-    case RDP:
-      SRSendZeros(11);
-      SRSendOnes(1);
-      break;
-    case LDP:
-      SRSendOnes(1);
-      SRSendZeros(11);
-      break;
-    case BLANK:
-      SRSendZeros(12);
-      break;
-    default:
-      SRSendZeros(display.tube[TUBE2]);
-      SRSendOnes(1);
-      SRSendZeros(11 - display.tube[TUBE2]);
-  }
+  handleGenericTube(TUBE1);
+  handleGenericTube(TUBE2);
 
   switch (display.tube[TUBE3]) {
     case 8:
