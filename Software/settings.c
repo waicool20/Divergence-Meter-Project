@@ -30,15 +30,15 @@
 #include "util/display.h"
 
 uint8_t EEMEM default_brightness = 5;
-uint8_t EEMEM date_format  = 0;
-uint8_t EEMEM formats = 0x01;
+uint8_t EEMEM adaptive_brightness = 0;
+uint8_t EEMEM formats = (1<<TIME_FORMAT_24H) | (1<<DATE_FORMAT_DD_MM);
 
 Settings settings;
 
 void settings_init(){
   settings_readDS3232();
   settings.default_brightness = eeprom_read_byte(&default_brightness);
-  settings.date_format = eeprom_read_byte(&date_format);
+  settings.adaptive_brightness = eeprom_read_byte(&adaptive_brightness);
   settings.formats = eeprom_read_byte(&formats);
 }
 

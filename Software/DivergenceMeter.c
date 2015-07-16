@@ -113,15 +113,15 @@ int main() {
         DivergenceMeter_settingsMode();
         break;
     }
+    set_sleep_mode(SLEEP_MODE_IDLE);
+    sleep_enable();
+    sleep_bod_disable();
+    sei();
+    power_adc_disable();
+    power_usi_disable();
+    sleep_disable();
+    power_adc_enable();
   }
-  set_sleep_mode(SLEEP_MODE_IDLE);
-  sleep_enable();
-  sleep_bod_disable();
-  sei();
-  power_adc_disable();
-  power_usi_disable();
-  sleep_disable();
-  power_adc_enable();
   return 0;
 }
 
@@ -135,8 +135,9 @@ void tmr0_init() {
 }
 
 void ADC_init() {
-  ADMUX = (1 << ADLAR) | 0x07;
-  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1);
+  ADMUX = (1<<ADLAR) | 0x07; //ADC channel 7
+  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1<<ADATE);
+  ADCSRB  = (1<<ADTS1) | (1<<ADTS0);
   ADCSRA |= (1 << ADSC);
   while (ADCSRA & (1 << ADSC))
     ;
@@ -200,6 +201,9 @@ ISR(TIMER0_COMPA_vect) {
     current_mode = SETTINGS_MODE;
     just_entered_mode[current_mode] = true;
   }
+  if(settings.adaptive_brightness){
+    display_updateAdaptiveBrightness();
+  }
   clockCount++;
   if(clockCount > 9){
     settings_readDS3232();
@@ -230,8 +234,13 @@ void DivergenceMeter_clockMode() {
   } else if (button_is_pressed[BUTTON4]) {
     shouldRoll = true;
     DivergenceMeter_rollWorldLineWithDelay(true);
-  } else if (button_is_pressed[BUTTON5]) {
+  } else if (button_short_pressed[BUTTON5]) {
+    display_adaptiveBrightnessOff();
     display_toggleBrightness();
+    display_showCurrentBrightness();
+    _delay_ms(BRIGHTNESS_DISPLAY_MS);
+  } else if (button_long_pressed[BUTTON5]  && !settings.adaptive_brightness){
+    display_adaptiveBrightnessOn();
     display_showCurrentBrightness();
     _delay_ms(BRIGHTNESS_DISPLAY_MS);
   }
@@ -282,9 +291,17 @@ void DivergenceMeter_divergenceMode() {
   } else if (button_is_pressed[BUTTON4]) {
     shouldRoll = true;
     DivergenceMeter_rollWorldLine(true);
-  } else if (button_is_pressed[BUTTON5]) {
+  } else if (button_short_pressed[BUTTON5]) {
+    display_adaptiveBrightnessOff();
     display_saveState();
     display_toggleBrightness();
+    display_showCurrentBrightness();
+    _delay_ms(BRIGHTNESS_DISPLAY_MS);
+    display_restoreState();
+    display_update();
+  } else if (button_long_pressed[BUTTON5] && !settings.adaptive_brightness){
+    display_saveState();
+    display_adaptiveBrightnessOn();
     display_showCurrentBrightness();
     _delay_ms(BRIGHTNESS_DISPLAY_MS);
     display_restoreState();

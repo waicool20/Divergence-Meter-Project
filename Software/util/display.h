@@ -35,7 +35,15 @@ void display_on();
 
 void display_off();
 
+void display_adaptiveBrightnessOn();
+
+void display_adaptiveBrightnessOff();
+
+void display_updateAdaptiveBrightness();
+
 void display_showCurrentBrightness();
+
+void display_setBrightness(uint8_t b);
 
 void display_increaseBrightness();
 

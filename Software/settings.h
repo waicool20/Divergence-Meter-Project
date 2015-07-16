@@ -20,6 +20,9 @@
 
 #include <stdint.h>
 
+#define TIME_FORMAT_24H 0
+#define DATE_FORMAT_DD_MM 1
+
 typedef struct {
   uint8_t seconds;
   uint8_t minutes;
@@ -40,7 +43,7 @@ typedef struct {
   uint8_t alarm2_day_date;
 
   uint8_t default_brightness;
-	uint8_t date_format;
+	uint8_t adaptive_brightness;
 	uint8_t formats;
 } Settings;
 

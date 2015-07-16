@@ -318,12 +318,32 @@ void display_showCurrentBrightness() {
   display.tube[TUBE1] = BLANK;
   display.tube[TUBE2] = BLANK;
   display.tube[TUBE3] = BLANK;
-  display.tube[TUBE4] = 0;
-  display.tube[TUBE5] = brightness;
+  display.tube[TUBE4] = settings.adaptive_brightness ? 9 : 0;
+  display.tube[TUBE5] = settings.adaptive_brightness ? 9 : brightness;
   display.tube[TUBE6] = BLANK;
   display.tube[TUBE7] = BLANK;
   display.tube[TUBE8] = BLANK;
   display_update();
+}
+
+void display_adaptiveBrightnessOn(){
+  settings.adaptive_brightness = 1;
+}
+
+void display_adaptiveBrightnessOff(){
+  settings.adaptive_brightness = 0;
+}
+
+void display_updateAdaptiveBrightness(){
+  uint8_t adc_temp = 255 - ADCH;
+  OCR1A = (adc_temp >= 250 ? 250 : (adc_temp >= 25 ? adc_temp : 25));
+}
+
+void display_setBrightness(uint8_t b){
+  if( b <= 9){
+    brightness = b;
+    OCR1A = pgm_read_word(&(brightnessLevels[brightness]));
+  }
 }
 
 void display_increaseBrightness() {
