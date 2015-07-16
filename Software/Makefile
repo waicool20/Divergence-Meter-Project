@@ -93,7 +93,9 @@ OPT = s
 #C flags
 CFLAGS = -g
 CFLAGS += -DF_CPU=$(MCU_FREQ)
-CFLAGS += -O$(OPT)
+CFLAGS += -O$(OPT) 
+CFLAGS += -fpack-struct
+CFLAGS += -funsigned-char
 CFLAGS += -Wall
 CFLAGS += -Werror
 CFLAGS += -Wextra
