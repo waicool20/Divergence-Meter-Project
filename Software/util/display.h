@@ -35,10 +35,6 @@ void display_on();
 
 void display_off();
 
-void display_adaptiveBrightnessOn();
-
-void display_adaptiveBrightnessOff();
-
 void display_updateAdaptiveBrightness();
 
 void display_showCurrentBrightness();

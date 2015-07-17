@@ -42,22 +42,21 @@ FUSES = { .low = 0x82, .high = 0xDF, .extended = 0x01, };
 
 /* World line constants */
 const uint8_t PROGMEM WORLD_LINES[32][8] = { { 0, RDP, 0, 0, 0, 0, 0, 0 }, { 0,
-    RDP, 3, 2, 8, 4, 0, 3 }, { 0, RDP, 3, 3, 4, 5, 8, 1 }, { 0, RDP, 3, 3, 7, 1,
-    8, 7 }, { 0, RDP, 3, 3, 7, 1, 9, 9 }, { 0, RDP, 3, 3, 7, 3, 3, 7 }, { 0,
-    RDP, 4, 0, 9, 4, 2, 0 }, { 0, RDP, 4, 0, 9, 4, 3, 1 }, { 0, RDP, 4, 5, 6, 9,
-    0, 3 }, { 0, RDP, 4, 5, 6, 9, 1, 4 }, { 0, RDP, 4, 5, 6, 9, 2, 3 }, { 0,
-    RDP, 5, 2, 3, 2, 9, 9 }, { 0, RDP, 5, 2, 3, 3, 0, 7 }, { 0, RDP, 5, 7, 1, 0,
-    1, 5 }, { 0, RDP, 5, 7, 1, 0, 2, 4 }, { 0, RDP, 5, 7, 1, 0, 4, 6 }, { 1,
-    RDP, 0, 4, 8, 5, 9, 6 }, { 1, RDP, 0, 4, 8, 5, 9, 9 }, { 1, RDP, 0, 4, 9, 3,
-    2, 6 }, { 1, RDP, 1, 3, 0, 4, 2, 6 }, { 2, RDP, 6, 1, 5, 0, 7, 4 }, { 3,
-    RDP, 0, 1, 9, 4, 3, 0 }, { 3, RDP, 0, 3, 0, 4, 9, 3 }, { 3, RDP, 1, 3, 0, 2,
-    3, 8 }, { 3, RDP, 1, 8, 2, 8, 7, 9 }, { 3, RDP, 3, 7, 2, 3, 2, 9 }, { 3,
-    RDP, 3, 8, 6, 0, 1, 9 }, { 3, RDP, 4, 0, 6, 2, 8, 8 }, { 3, RDP, 4, 0, 6, 2,
-    8, 8 }, { 3, RDP, 6, 0, 0, 1, 0, 4 }, { 3, RDP, 6, 6, 7, 2, 9, 3 }, { BLANK,
-    RDP, 2, 7, 5, 3, 4, 9 }, };
+RDP, 3, 2, 8, 4, 0, 3 }, { 0, RDP, 3, 3, 4, 5, 8, 1 }, { 0, RDP, 3, 3, 7, 1, 8,
+    7 }, { 0, RDP, 3, 3, 7, 1, 9, 9 }, { 0, RDP, 3, 3, 7, 3, 3, 7 }, { 0,
+RDP, 4, 0, 9, 4, 2, 0 }, { 0, RDP, 4, 0, 9, 4, 3, 1 }, { 0, RDP, 4, 5, 6, 9, 0,
+    3 }, { 0, RDP, 4, 5, 6, 9, 1, 4 }, { 0, RDP, 4, 5, 6, 9, 2, 3 }, { 0,
+RDP, 5, 2, 3, 2, 9, 9 }, { 0, RDP, 5, 2, 3, 3, 0, 7 }, { 0, RDP, 5, 7, 1, 0, 1,
+    5 }, { 0, RDP, 5, 7, 1, 0, 2, 4 }, { 0, RDP, 5, 7, 1, 0, 4, 6 }, { 1,
+RDP, 0, 4, 8, 5, 9, 6 }, { 1, RDP, 0, 4, 8, 5, 9, 9 }, { 1, RDP, 0, 4, 9, 3, 2,
+    6 }, { 1, RDP, 1, 3, 0, 4, 2, 6 }, { 2, RDP, 6, 1, 5, 0, 7, 4 }, { 3,
+RDP, 0, 1, 9, 4, 3, 0 }, { 3, RDP, 0, 3, 0, 4, 9, 3 }, { 3, RDP, 1, 3, 0, 2, 3,
+    8 }, { 3, RDP, 1, 8, 2, 8, 7, 9 }, { 3, RDP, 3, 7, 2, 3, 2, 9 }, { 3,
+RDP, 3, 8, 6, 0, 1, 9 }, { 3, RDP, 4, 0, 6, 2, 8, 8 }, { 3, RDP, 4, 0, 6, 2, 8,
+    8 }, { 3, RDP, 6, 0, 0, 1, 0, 4 }, { 3, RDP, 6, 6, 7, 2, 9, 3 }, { BLANK,
+RDP, 2, 7, 5, 3, 4, 9 }, };
 
 /* Prototypes */
-
 
 void DivergenceMeter_init();
 
@@ -65,14 +64,15 @@ void DivergenceMeter_clockMode();
 void DivergenceMeter_displayCurrentTime();
 void DivergenceMeter_displayCurrentDate();
 
-
 void DivergenceMeter_divergenceMode();
 void DivergenceMeter_showCurrentWorldLine();
 void DivergenceMeter_showPrevWorldLine();
 void DivergenceMeter_showNextWorldLine();
 
 void DivergenceMeter_divergenceEditMode();
+
 void DivergenceMeter_settingsMode();
+void DivergenceMeter_updateSettingsDisplay();
 
 void DivergenceMeter_rollWorldLine(bool rollTube2);
 void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2);
@@ -82,9 +82,10 @@ void DivergenceMeter_showBrightness();
 
 volatile uint8_t current_mode = 0;
 volatile uint8_t clockCount = 0;
-volatile bool just_entered_mode[4] = { false, false, false };
-volatile uint16_t button_count[5] = { 0, 0, 0, 0, 0 };
+volatile bool just_entered_mode[6] =
+    { false, false, false, false, false, false };
 
+volatile uint16_t button_count[5] = { 0, 0, 0, 0, 0 };
 volatile bool button_is_pressed[5] = { false, false, false, false, false };
 volatile bool button_short_pressed[5] = { false, false, false, false, false };
 volatile bool button_long_pressed[5] = { false, false, false, false, false };
@@ -94,6 +95,7 @@ volatile bool button_long_pressed[5] = { false, false, false, false, false };
 bool shouldRoll = false;
 uint8_t currentWorldLineIndex = 0;
 uint8_t currentTube = 0;
+uint8_t currentSetting = 0;
 
 /* Main Code Start */
 
@@ -115,12 +117,14 @@ int main() {
         break;
     }
     set_sleep_mode(SLEEP_MODE_IDLE);
-    sleep_enable();
+    sleep_enable()
+    ;
     sleep_bod_disable();
     sei();
     power_adc_disable();
     power_usi_disable();
-    sleep_disable();
+    sleep_disable()
+    ;
     power_adc_enable();
   }
   return 0;
@@ -136,9 +140,9 @@ void tmr0_init() {
 }
 
 void ADC_init() {
-  ADMUX = (1<<ADLAR) | 0x07; //ADC channel 7
-  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1<<ADATE);
-  ADCSRB  = (1<<ADTS1) | (1<<ADTS0);
+  ADMUX = (1 << ADLAR) | 0x07;  //ADC channel 7
+  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADATE);
+  ADCSRB = (1 << ADTS1) | (1 << ADTS0);
   ADCSRA |= (1 << ADSC);
   while (ADCSRA & (1 << ADSC))
     ;
@@ -179,7 +183,7 @@ ISR(TIMER0_COMPA_vect) {
       button_is_pressed[i] = true;
       button_short_pressed[i] = false;
       button_long_pressed[i] = true;
-    } else if (button_count[i] > (BUTTON_SHORT_PRESS_MAX_DURATION_MS / 10)){
+    } else if (button_count[i] > (BUTTON_SHORT_PRESS_MAX_DURATION_MS / 10)) {
       button_is_pressed[i] = true;
       button_short_pressed[i] = false;
       button_long_pressed[i] = false;
@@ -198,15 +202,15 @@ ISR(TIMER0_COMPA_vect) {
     }
     _delay_ms(200);
     just_entered_mode[current_mode] = true;
-  } else if (button_long_pressed[BUTTON1] && current_mode != SETTINGS_MODE){
+  } else if (button_long_pressed[BUTTON1] && current_mode != SETTINGS_MODE) {
     current_mode = SETTINGS_MODE;
     just_entered_mode[current_mode] = true;
   }
-  if(settings.defaults[ADAPTIVE_BRIGHTNESS_ON]){
+  if (settings.main[BRIGHTNESS] == 10) {
     display_updateAdaptiveBrightness();
   }
   clockCount++;
-  if(clockCount > 9){
+  if (clockCount > 9) {
     settings_readTimeDS3232();
     clockCount = 0;
   }
@@ -217,8 +221,10 @@ ISR(TIMER0_COMPA_vect) {
 /* Clock Mode Code */
 
 void DivergenceMeter_clockMode() {
-  DivergenceMeter_displayCurrentTime();
-  switch (settings.time[SECONDS]){
+  if (just_entered_mode[CLOCK_MODE]) {
+    just_entered_mode[CLOCK_MODE] = false;
+  }
+  switch (settings.time[SECONDS]) {
     case 0x00:
       shouldRoll = true;
       DivergenceMeter_rollWorldLine(false);
@@ -235,15 +241,12 @@ void DivergenceMeter_clockMode() {
   } else if (button_is_pressed[BUTTON4]) {
     shouldRoll = true;
     DivergenceMeter_rollWorldLineWithDelay(true);
-  } else if (button_short_pressed[BUTTON5]) {
-    display_adaptiveBrightnessOff();
+  } else if (button_is_pressed[BUTTON5]) {
     display_toggleBrightness();
     DivergenceMeter_showBrightness();
-  } else if (button_long_pressed[BUTTON5]  && !settings.defaults[ADAPTIVE_BRIGHTNESS_ON]){
-    display_adaptiveBrightnessOn();
-    DivergenceMeter_showBrightness();
+    return;
   }
-  just_entered_mode[CLOCK_MODE] = false;
+  DivergenceMeter_displayCurrentTime();
 }
 
 void DivergenceMeter_displayCurrentTime() {
@@ -274,7 +277,9 @@ void DivergenceMeter_displayCurrentDate() {
 
 void DivergenceMeter_divergenceMode() {
   if (just_entered_mode[DIVERGENCE_MODE]) {
-    DivergenceMeter_rollWorldLineWithDelay(true);
+    DivergenceMeter_rollWorldLine(true);
+    display_saveState();
+    just_entered_mode[DIVERGENCE_MODE] = false;
   }
   if (button_long_pressed[BUTTON2] && button_long_pressed[BUTTON3]) {
     current_mode = DIVERGENCE_EDIT_MODE;
@@ -282,23 +287,23 @@ void DivergenceMeter_divergenceMode() {
   } else if (button_short_pressed[BUTTON2]) {
     DivergenceMeter_rollWorldLine(true);
     DivergenceMeter_showPrevWorldLine();
+    display_saveState();
     _delay_ms(200);
   } else if (button_short_pressed[BUTTON3]) {
     DivergenceMeter_rollWorldLine(true);
     DivergenceMeter_showNextWorldLine();
+    display_saveState();
     _delay_ms(200);
   } else if (button_is_pressed[BUTTON4]) {
-    shouldRoll = true;
     DivergenceMeter_rollWorldLine(true);
-  } else if (button_short_pressed[BUTTON5]) {
-    display_adaptiveBrightnessOff();
+    display_saveState();
+  } else if (button_is_pressed[BUTTON5]) {
     display_toggleBrightness();
     DivergenceMeter_showBrightness();
-  } else if (button_long_pressed[BUTTON5] && !settings.defaults[ADAPTIVE_BRIGHTNESS_ON]){
-    display_adaptiveBrightnessOn();
-    DivergenceMeter_showBrightness();
+    return;
   }
-  just_entered_mode[DIVERGENCE_MODE] = false;
+  display_restoreState();
+  display_update();
 }
 
 void DivergenceMeter_showCurrentWorldLine() {
@@ -385,7 +390,7 @@ void DivergenceMeter_divergenceEditMode() {
       display_update();
     }
     _delay_ms(200);
-  } else if (button_short_pressed[BUTTON5]){
+  } else if (button_short_pressed[BUTTON5]) {
     if (currentTube > 0) {
       display.tube[currentTube] = BLANK;
       if (currentTube == TUBE3) {
@@ -402,18 +407,78 @@ void DivergenceMeter_divergenceEditMode() {
 /* Settings Mode Code */
 
 void DivergenceMeter_settingsMode() {
-  if(just_entered_mode[SETTINGS_MODE]){
-    display.tube[TUBE1] = 1;
-    display.tube[TUBE2] = 2;
-    display.tube[TUBE3] = 3;
-    display.tube[TUBE4] = 4;
-    display.tube[TUBE5] = 5;
-    display.tube[TUBE6] = 6;
-    display.tube[TUBE7] = 7;
-    display.tube[TUBE8] = 8;
+  if (just_entered_mode[SETTINGS_MODE]) {
+    currentSetting = TIME_FORMAT_24H;
+    display.tube[TUBE1] = 0;
+    display.tube[TUBE2] = currentSetting;
+    display.tube[TUBE3] = BLANK;
+    display.tube[TUBE4] = BLANK;
+    display.tube[TUBE5] = BLANK;
+    display.tube[TUBE6] = BLANK;
+    display.tube[TUBE7] = 0;
+    display.tube[TUBE8] = settings.main[currentSetting];
     display_update();
     just_entered_mode[SETTINGS_MODE] = false;
   }
+  if (button_is_pressed[BUTTON2] || button_is_pressed[BUTTON3]) {
+    display.tube[TUBE1] = 0;
+    display.tube[TUBE2] = currentSetting;
+    switch (currentSetting) {
+      case TIME_FORMAT_24H:
+      case DATE_FORMAT_DD_MM:
+        settings.main[currentSetting] = settings.main[currentSetting] ? 0 : 1;
+        break;
+      case REST_ON_HOUR:
+      case WAKE_ON_HOUR:
+        if (button_is_pressed[BUTTON3]) {
+          if (settings.main[currentSetting] < 24) {
+            settings.main[currentSetting]++;
+          }
+        } else if (button_is_pressed[BUTTON2]) {
+          if (settings.main[currentSetting] > 0) {
+            settings.main[currentSetting]--;
+          }
+        }
+        break;
+      case REST_ON_MINUTE:
+      case WAKE_ON_MINUTE:
+        if (button_is_pressed[BUTTON3]) {
+          if (settings.main[currentSetting] < 60) {
+            settings.main[currentSetting]++;
+          }
+        } else if (button_is_pressed[BUTTON2]) {
+          if (settings.main[currentSetting] > 0) {
+            settings.main[currentSetting]--;
+          }
+        }
+        break;
+    }
+    DivergenceMeter_updateSettingsDisplay();
+    _delay_ms(100);
+  } else if (button_short_pressed[BUTTON4]) {
+    if (currentSetting < WAKE_ON_MINUTE) {
+      currentSetting++;
+      DivergenceMeter_updateSettingsDisplay();
+    } else {
+      settings_writeSettingsDS3232();
+      current_mode = CLOCK_MODE;
+      just_entered_mode[CLOCK_MODE] = true;
+    }
+    _delay_ms(200);
+  } else if (button_short_pressed[BUTTON5]) {
+    if (currentSetting > TIME_FORMAT_24H) {
+      currentSetting--;
+      DivergenceMeter_updateSettingsDisplay();
+      _delay_ms(200);
+    }
+  }
+}
+
+void DivergenceMeter_updateSettingsDisplay() {
+  display.tube[TUBE2] = currentSetting;
+  display.tube[TUBE7] = (settings.main[currentSetting] / 10) % 10;
+  display.tube[TUBE8] = settings.main[currentSetting] % 10;
+  display_update();
 }
 
 /* Misc Code */
@@ -461,9 +526,6 @@ void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2) {
 }
 
 void DivergenceMeter_showBrightness() {
-  display_saveState();
   display_showCurrentBrightness();
   _delay_ms(BRIGHTNESS_DISPLAY_MS);
-  display_restoreState();
-  display_update();
 }

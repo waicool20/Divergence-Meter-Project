@@ -23,38 +23,44 @@
 #include "settings.h"
 
 #include <stdint.h>
-#include <avr/eeprom.h>
+#include <avr/pgmspace.h>
 
 #include "constants.h"
 #include "i2cmaster.h"
 #include "util/display.h"
 
-uint8_t EEMEM default_brightness = 5;
-uint8_t EEMEM adaptive_brightness_on = 0;
-uint8_t EEMEM rest_on_hour = 0;
-uint8_t EEMEM rest_on_minute = 0;
-uint8_t EEMEM wake_on_hour = 0;
-uint8_t EEMEM wake_on_minute = 0;
-uint8_t EEMEM time_format_24h = 1;
-uint8_t EEMEM date_format_dd_mm = 0;
+const uint8_t PROGMEM default_settings[3] = { 10,  // DEFAULT_BRIGHTNESS
+    1,  // TIME_FORMAT_24H
+    1,  // DATE_FORMAT_DD_MM
+    };
 
 Settings settings;
 
-void settings_init(){
+void settings_init() {
   settings_readDS3232();
-  settings.defaults[DEFAULT_BRIGHTNESS] = eeprom_read_byte(&default_brightness);
-  settings.defaults[ADAPTIVE_BRIGHTNESS_ON] = eeprom_read_byte(&adaptive_brightness_on);
-  settings.defaults[TIME_FORMAT_24H] = eeprom_read_byte(&time_format_24h);
-  settings.defaults[DATE_FORMAT_DD_MM] = eeprom_read_byte(&date_format_dd_mm);
+  if (!settings.not_first_boot) {
+    settings.main[BRIGHTNESS] = pgm_read_byte(&(default_settings[BRIGHTNESS]));
+    settings.main[TIME_FORMAT_24H] = pgm_read_byte(
+        &(default_settings[TIME_FORMAT_24H]));
+    settings.main[DATE_FORMAT_DD_MM] = pgm_read_byte(
+        &(default_settings[DATE_FORMAT_DD_MM]));
+    settings.main[REST_ON_HOUR] = 0;
+    settings.main[REST_ON_MINUTE] = 0;
+    settings.main[WAKE_ON_HOUR] = 0;
+    settings.main[WAKE_ON_MINUTE] = 0;
+    settings.not_first_boot = 1;
+    settings_writeSettingsDS3232();
+  }
 }
 
 void settings_readDS3232() {
   settings_readTimeDS3232();
   settings_readAlarm1DS3232();
   settings_readAlarm2DS3232();
+  settings_readSettingsDS3232();
 }
 
-void settings_readTimeDS3232(){
+void settings_readTimeDS3232() {
   i2c_start_wait(DS3232 + I2C_WRITE);
   i2c_write(0x00);
   i2c_rep_start(DS3232 + I2C_READ);
@@ -68,7 +74,7 @@ void settings_readTimeDS3232(){
   i2c_stop();
 }
 
-void settings_readAlarm1DS3232(){
+void settings_readAlarm1DS3232() {
   i2c_start_wait(DS3232 + I2C_WRITE);
   i2c_write(0x07);
   i2c_rep_start(DS3232 + I2C_READ);
@@ -79,7 +85,7 @@ void settings_readAlarm1DS3232(){
   i2c_stop();
 }
 
-void settings_readAlarm2DS3232(){
+void settings_readAlarm2DS3232() {
   i2c_start_wait(DS3232 + I2C_WRITE);
   i2c_write(0x0B);
   i2c_rep_start(DS3232 + I2C_READ);
@@ -89,43 +95,77 @@ void settings_readAlarm2DS3232(){
   i2c_stop();
 }
 
-void settings_writeDS3232(){
+void settings_readSettingsDS3232() {
+  i2c_start_wait(DS3232 + I2C_WRITE);
+  i2c_write(0x14);
+  i2c_rep_start(DS3232 + I2C_READ);
+  settings.main[BRIGHTNESS] = i2c_readAck();
+  settings.main[TIME_FORMAT_24H] = i2c_readAck();
+  settings.main[DATE_FORMAT_DD_MM] = i2c_readAck();
+
+  settings.main[REST_ON_HOUR] = i2c_readAck();
+  settings.main[REST_ON_MINUTE] = i2c_readAck();
+  settings.main[WAKE_ON_HOUR] = i2c_readAck();
+  settings.main[WAKE_ON_MINUTE] = i2c_readAck();
+
+  settings.not_first_boot = i2c_readNak();
+  i2c_stop();
+}
+
+void settings_writeDS3232() {
   settings_writeTimeDS3232();
   settings_writeAlarm1DS3232();
   settings_writeAlarm2DS3232();
 }
 
-void settings_writeTimeDS3232(){
+void settings_writeTimeDS3232() {
   i2c_start_wait(DS3232 + I2C_WRITE);
   i2c_write(0x00);
 
-  i2c_write(settings.time[SECONDS]); //00h
-  i2c_write(settings.time[MINUTES]); //01h
-  i2c_write(settings.time[HOURS]); //02h
-  i2c_write(settings.time[DAY_OF_WEEK]); //03h
-  i2c_write(settings.time[DATE]); //04h
-  i2c_write(settings.time[MONTH]); //05h
-  i2c_write(settings.time[YEAR]); //06h
+  i2c_write(settings.time[SECONDS]);  //00h
+  i2c_write(settings.time[MINUTES]);  //01h
+  i2c_write(settings.time[HOURS]);  //02h
+  i2c_write(settings.time[DAY_OF_WEEK]);  //03h
+  i2c_write(settings.time[DATE]);  //04h
+  i2c_write(settings.time[MONTH]);  //05h
+  i2c_write(settings.time[YEAR]);  //06h
   i2c_stop();
 }
 
-void settings_writeAlarm1DS3232(){
+void settings_writeAlarm1DS3232() {
   i2c_start_wait(DS3232 + I2C_WRITE);
   i2c_write(0x07);
 
-  i2c_write(settings.alarm[ALARM1_SECONDS]); //07h
-  i2c_write(settings.alarm[ALARM1_MINUTES]); //08h
-  i2c_write(settings.alarm[ALARM1_HOURS]); //09h
-  i2c_write(settings.alarm[ALARM1_DAY_DATE]); //0Ah
+  i2c_write(settings.alarm[ALARM1_SECONDS]);  //07h
+  i2c_write(settings.alarm[ALARM1_MINUTES]);  //08h
+  i2c_write(settings.alarm[ALARM1_HOURS]);  //09h
+  i2c_write(settings.alarm[ALARM1_DAY_DATE]);  //0Ah
   i2c_stop();
 }
 
-void settings_writeAlarm2DS3232(){
+void settings_writeAlarm2DS3232() {
   i2c_start_wait(DS3232 + I2C_WRITE);
   i2c_write(0x0B);
 
-  i2c_write(settings.alarm[ALARM2_MINUTES]); //0Bh
-  i2c_write(settings.alarm[ALARM2_HOURS]); //0Ch
-  i2c_write(settings.alarm[ALARM2_DAY_DATE]); //0Dh
+  i2c_write(settings.alarm[ALARM2_MINUTES]);  //0Bh
+  i2c_write(settings.alarm[ALARM2_HOURS]);  //0Ch
+  i2c_write(settings.alarm[ALARM2_DAY_DATE]);  //0Dh
+  i2c_stop();
+}
+
+void settings_writeSettingsDS3232() {
+  i2c_start_wait(DS3232 + I2C_WRITE);
+  i2c_write(0x14);
+
+  i2c_write(settings.main[BRIGHTNESS]);
+  i2c_write(settings.main[TIME_FORMAT_24H]);
+  i2c_write(settings.main[DATE_FORMAT_DD_MM]);
+
+  i2c_write(settings.main[REST_ON_HOUR]);
+  i2c_write(settings.main[REST_ON_MINUTE]);
+  i2c_write(settings.main[WAKE_ON_HOUR]);
+  i2c_write(settings.main[WAKE_ON_MINUTE]);
+
+  i2c_write(settings.not_first_boot);
   i2c_stop();
 }

@@ -33,7 +33,6 @@
 #include "../settings.h"
 #include "shiftregister.h"
 
-uint8_t brightness;
 const uint16_t PROGMEM brightnessLevels[10] = { 25, 50, 75, 100, 125, 150, 175,
     200, 225, 250 };  //Somehow won't work with uint8_t
 
@@ -52,14 +51,13 @@ void display_init() {
   SRLatch();
   display_on();
   tmr1_init();
-  brightness = settings.defaults[ADAPTIVE_BRIGHTNESS_ON];
   OCR1C = 0xFF;
-  OCR1A = pgm_read_word(&(brightnessLevels[brightness]));
+  OCR1A = pgm_read_word(&(brightnessLevels[settings.main[BRIGHTNESS]]));
 
   display_update();
 }
 
-void handleGenericTube(uint8_t tube){
+void handleGenericTube(uint8_t tube) {
   switch (display.tube[tube]) {
     case 0:
       SRSendZeros(10);
@@ -211,56 +209,49 @@ void display_showCurrentBrightness() {
   display.tube[TUBE1] = BLANK;
   display.tube[TUBE2] = BLANK;
   display.tube[TUBE3] = BLANK;
-  display.tube[TUBE4] = settings.defaults[ADAPTIVE_BRIGHTNESS_ON] ? 9 : 0;
-  display.tube[TUBE5] = settings.defaults[ADAPTIVE_BRIGHTNESS_ON] ? 9 : brightness;
+  display.tube[TUBE4] = settings.main[BRIGHTNESS] == 10 ? 1 : 0;
+  display.tube[TUBE5] =
+      settings.main[BRIGHTNESS] == 10 ? 0 : settings.main[BRIGHTNESS];
   display.tube[TUBE6] = BLANK;
   display.tube[TUBE7] = BLANK;
   display.tube[TUBE8] = BLANK;
   display_update();
 }
 
-void display_adaptiveBrightnessOn(){
-  settings.defaults[ADAPTIVE_BRIGHTNESS_ON] = 1;
-}
-
-void display_adaptiveBrightnessOff(){
-  settings.defaults[ADAPTIVE_BRIGHTNESS_ON] = 0;
-}
-
-void display_updateAdaptiveBrightness(){
+void display_updateAdaptiveBrightness() {
   uint8_t adc_temp = 255 - ADCH;
   OCR1A = (adc_temp >= 250 ? 250 : (adc_temp >= 25 ? adc_temp : 25));
 }
 
-void display_setBrightness(uint8_t b){
-  if( b <= 9){
-    brightness = b;
-    OCR1A = pgm_read_word(&(brightnessLevels[brightness]));
+void display_setBrightness(uint8_t b) {
+  if (b <= 10) {
+    settings.main[BRIGHTNESS] = b;
+    OCR1A = pgm_read_word(&(brightnessLevels[settings.main[BRIGHTNESS]]));
   }
 }
 
 void display_increaseBrightness() {
-  if (brightness < 9) {
-    brightness++;
-    OCR1A = pgm_read_word(&(brightnessLevels[brightness]));
+  if (settings.main[BRIGHTNESS] < 10) {
+    settings.main[BRIGHTNESS]++;
+    OCR1A = pgm_read_word(&(brightnessLevels[settings.main[BRIGHTNESS]]));
   }
 }
 
 void display_decreaseBrightness() {
-  if (brightness > 0) {
-    brightness--;
-    OCR1A = pgm_read_word(&(brightnessLevels[brightness]));
+  if (settings.main[BRIGHTNESS] > 0) {
+    settings.main[BRIGHTNESS]--;
+    OCR1A = pgm_read_word(&(brightnessLevels[settings.main[BRIGHTNESS]]));
   }
 }
 
 void display_toggleBrightness() {
-  if (brightness < 9) {
-    brightness++;
-    OCR1A = pgm_read_word(&(brightnessLevels[brightness]));
+  if (settings.main[BRIGHTNESS] < 10) {
+    settings.main[BRIGHTNESS]++;
   } else {
-    brightness = 0;
-    OCR1A = pgm_read_word(&(brightnessLevels[brightness]));
+    settings.main[BRIGHTNESS] = 0;
   }
+  OCR1A = pgm_read_word(&(brightnessLevels[settings.main[BRIGHTNESS]]));
+  settings_writeSettingsDS3232();
 }
 
 void display_saveState() {

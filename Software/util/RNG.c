@@ -39,7 +39,7 @@ void RNG_init() {
   randx = 1;
 }
 
-void RNG_next(){
+void RNG_next() {
   randx++;
   randa = (randa ^ randc ^ randx);
   randb = (randb + randa);
@@ -49,11 +49,11 @@ void RNG_next(){
 uint8_t RNG_nextChar() {
   RNG_next();
   uint8_t temp = randc & 0x0F;
-  return temp > 9 ? temp - (16-9) : temp;
+  return temp > 9 ? temp - (16 - 9) : temp;
 }
 
-uint8_t RNG_nextCharWithDP(){
+uint8_t RNG_nextCharWithDP() {
   RNG_next();
   uint8_t temp = randc & 0x0F;
-  return temp > 11 ? temp - (16-11) : temp;
+  return temp > 11 ? temp - (16 - 11) : temp;
 }
