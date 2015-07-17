@@ -20,6 +20,8 @@
  * Random Number Generator code
  */
 
+#include "RNG.h"
+
 #include <stdint.h>
 #include <avr/io.h>
 

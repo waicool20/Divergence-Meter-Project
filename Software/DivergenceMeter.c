@@ -21,6 +21,8 @@
  * General logic will be implemented here.
  */
 
+#include "DivergenceMeter.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -29,59 +31,29 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 #include <avr/power.h>
-#include <avr/pgmspace.h>
 #include <util/delay.h>
 
 #include "constants.h"
-#include "i2cmaster.h"
+#include "modes/clockMode.h"
+#include "modes/divergenceEditMode.h"
+#include "modes/divergenceMode.h"
+#include "modes/settingsMode.h"
 #include "settings.h"
 #include "util/display.h"
 #include "util/RNG.h"
 
-FUSES = { .low = 0x82, .high = 0xDF, .extended = 0x01, };
 
-/* World line constants */
-const uint8_t PROGMEM WORLD_LINES[32][8] = { { 0, RDP, 0, 0, 0, 0, 0, 0 }, { 0,
-RDP, 3, 2, 8, 4, 0, 3 }, { 0, RDP, 3, 3, 4, 5, 8, 1 }, { 0, RDP, 3, 3, 7, 1, 8,
-    7 }, { 0, RDP, 3, 3, 7, 1, 9, 9 }, { 0, RDP, 3, 3, 7, 3, 3, 7 }, { 0,
-RDP, 4, 0, 9, 4, 2, 0 }, { 0, RDP, 4, 0, 9, 4, 3, 1 }, { 0, RDP, 4, 5, 6, 9, 0,
-    3 }, { 0, RDP, 4, 5, 6, 9, 1, 4 }, { 0, RDP, 4, 5, 6, 9, 2, 3 }, { 0,
-RDP, 5, 2, 3, 2, 9, 9 }, { 0, RDP, 5, 2, 3, 3, 0, 7 }, { 0, RDP, 5, 7, 1, 0, 1,
-    5 }, { 0, RDP, 5, 7, 1, 0, 2, 4 }, { 0, RDP, 5, 7, 1, 0, 4, 6 }, { 1,
-RDP, 0, 4, 8, 5, 9, 6 }, { 1, RDP, 0, 4, 8, 5, 9, 9 }, { 1, RDP, 0, 4, 9, 3, 2,
-    6 }, { 1, RDP, 1, 3, 0, 4, 2, 6 }, { 2, RDP, 6, 1, 5, 0, 7, 4 }, { 3,
-RDP, 0, 1, 9, 4, 3, 0 }, { 3, RDP, 0, 3, 0, 4, 9, 3 }, { 3, RDP, 1, 3, 0, 2, 3,
-    8 }, { 3, RDP, 1, 8, 2, 8, 7, 9 }, { 3, RDP, 3, 7, 2, 3, 2, 9 }, { 3,
-RDP, 3, 8, 6, 0, 1, 9 }, { 3, RDP, 4, 0, 6, 2, 8, 8 }, { 3, RDP, 4, 0, 6, 2, 8,
-    8 }, { 3, RDP, 6, 0, 0, 1, 0, 4 }, { 3, RDP, 6, 6, 7, 2, 9, 3 }, { BLANK,
-RDP, 2, 7, 5, 3, 4, 9 }, };
+FUSES = { .low = 0x82, .high = 0xDF, .extended = 0x01, };
 
 /* Prototypes */
 
 void DivergenceMeter_init();
 
-void DivergenceMeter_clockMode();
-void DivergenceMeter_displayCurrentTime();
-void DivergenceMeter_displayCurrentDate();
-
-void DivergenceMeter_divergenceMode();
-void DivergenceMeter_showCurrentWorldLine();
-void DivergenceMeter_showPrevWorldLine();
-void DivergenceMeter_showNextWorldLine();
-
-void DivergenceMeter_divergenceEditMode();
-
-void DivergenceMeter_settingsMode();
-void DivergenceMeter_updateSettingsDisplay();
-
-void DivergenceMeter_rollWorldLine(bool rollTube2);
-void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2);
-void DivergenceMeter_showBrightness();
-
 /* Volatile Variables (Modifiable by ISR)*/
 
-volatile uint8_t current_mode = 0;
 volatile uint8_t clockCount = 0;
+
+volatile uint8_t current_mode = 0;
 volatile bool just_entered_mode[6] =
     { false, false, false, false, false, false };
 
@@ -93,9 +65,6 @@ volatile bool button_long_pressed[5] = { false, false, false, false, false };
 /* Normal Variables */
 
 bool shouldRoll = false;
-uint8_t currentWorldLineIndex = 0;
-uint8_t currentTube = 0;
-uint8_t currentSetting = 0;
 
 /* Main Code Start */
 
@@ -104,16 +73,16 @@ int main() {
   while (1) {
     switch (current_mode) {
       case CLOCK_MODE:
-        DivergenceMeter_clockMode();
+        clockMode_run();
         break;
       case DIVERGENCE_MODE:
-        DivergenceMeter_divergenceMode();
+        divergenceMode_run();
         break;
       case DIVERGENCE_EDIT_MODE:
-        DivergenceMeter_divergenceEditMode();
+        divergenceEditMode_run();
         break;
       case SETTINGS_MODE:
-        DivergenceMeter_settingsMode();
+        settingsMode_run();
         break;
     }
     set_sleep_mode(SLEEP_MODE_IDLE);
@@ -158,7 +127,6 @@ void DivergenceMeter_init() {
   //Global interrupt enable
   sei();
 
-  i2c_init();
   settings_init();
   ADC_init();
   RNG_init();
@@ -216,269 +184,6 @@ ISR(TIMER0_COMPA_vect) {
   }
   TCNT0H = 0x00;
   TCNT0L = 0x00;
-}
-
-/* Clock Mode Code */
-
-void DivergenceMeter_clockMode() {
-  if (just_entered_mode[CLOCK_MODE]) {
-    just_entered_mode[CLOCK_MODE] = false;
-  }
-  switch (settings.time[SECONDS]) {
-    case 0x00:
-      shouldRoll = true;
-      DivergenceMeter_rollWorldLine(false);
-      DivergenceMeter_displayCurrentDate();
-      shouldRoll = false;
-      _delay_ms((DATE_DISPLAY_SECONDS * 1000));
-      break;
-  }
-  if (button_is_pressed[BUTTON2]) {
-    DivergenceMeter_displayCurrentDate();
-    _delay_ms((DATE_DISPLAY_SECONDS * 1000));
-  } else if (button_short_pressed[BUTTON3]) {
-
-  } else if (button_is_pressed[BUTTON4]) {
-    shouldRoll = true;
-    DivergenceMeter_rollWorldLineWithDelay(true);
-  } else if (button_is_pressed[BUTTON5]) {
-    display_toggleBrightness();
-    DivergenceMeter_showBrightness();
-    return;
-  }
-  DivergenceMeter_displayCurrentTime();
-}
-
-void DivergenceMeter_displayCurrentTime() {
-  display.tube[TUBE1] = (settings.time[HOURS] >> 4) & 0x01;
-  display.tube[TUBE2] = settings.time[HOURS] & 0x0F;
-  display.tube[TUBE3] = (settings.time[SECONDS] & 0x01) ? LDP : RDP;
-  display.tube[TUBE4] = (settings.time[MINUTES] >> 4);
-  display.tube[TUBE5] = settings.time[MINUTES] & 0x0F;
-  display.tube[TUBE6] = (settings.time[SECONDS] & 0x01) ? LDP : RDP;
-  display.tube[TUBE7] = (settings.time[SECONDS] >> 4);
-  display.tube[TUBE8] = settings.time[SECONDS] & 0x0F;
-  display_update();
-}
-
-void DivergenceMeter_displayCurrentDate() {
-  display.tube[TUBE1] = (settings.time[DATE] >> 4) & 0x03;
-  display.tube[TUBE2] = settings.time[DATE] & 0x0F;
-  display.tube[TUBE3] = LDP;
-  display.tube[TUBE4] = (settings.time[MONTH] >> 4) & 0x01;
-  display.tube[TUBE5] = settings.time[MONTH] & 0x0F;
-  display.tube[TUBE3] = RDP;
-  display.tube[TUBE7] = (settings.time[YEAR] >> 4);
-  display.tube[TUBE8] = settings.time[YEAR] & 0x0F;
-  display_update();
-}
-
-/* Divergence Mode Code */
-
-void DivergenceMeter_divergenceMode() {
-  if (just_entered_mode[DIVERGENCE_MODE]) {
-    DivergenceMeter_rollWorldLine(true);
-    display_saveState();
-    just_entered_mode[DIVERGENCE_MODE] = false;
-  }
-  if (button_long_pressed[BUTTON2] && button_long_pressed[BUTTON3]) {
-    current_mode = DIVERGENCE_EDIT_MODE;
-    just_entered_mode[DIVERGENCE_EDIT_MODE] = true;
-  } else if (button_short_pressed[BUTTON2]) {
-    DivergenceMeter_rollWorldLine(true);
-    DivergenceMeter_showPrevWorldLine();
-    display_saveState();
-    _delay_ms(200);
-  } else if (button_short_pressed[BUTTON3]) {
-    DivergenceMeter_rollWorldLine(true);
-    DivergenceMeter_showNextWorldLine();
-    display_saveState();
-    _delay_ms(200);
-  } else if (button_is_pressed[BUTTON4]) {
-    DivergenceMeter_rollWorldLine(true);
-    display_saveState();
-  } else if (button_is_pressed[BUTTON5]) {
-    display_toggleBrightness();
-    DivergenceMeter_showBrightness();
-    return;
-  }
-  display_restoreState();
-  display_update();
-}
-
-void DivergenceMeter_showCurrentWorldLine() {
-  display.tube[TUBE1] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][0]));
-  display.tube[TUBE2] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][1]));
-  display.tube[TUBE3] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][2]));
-  display.tube[TUBE4] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][3]));
-  display.tube[TUBE5] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][4]));
-  display.tube[TUBE6] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][5]));
-  display.tube[TUBE7] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][6]));
-  display.tube[TUBE8] = pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][7]));
-  display_update();
-}
-
-void DivergenceMeter_showNextWorldLine() {
-  if (currentWorldLineIndex < 31) {
-    currentWorldLineIndex++;
-  } else {
-    currentWorldLineIndex = 0;
-  }
-  DivergenceMeter_showCurrentWorldLine();
-}
-
-void DivergenceMeter_showPrevWorldLine() {
-  if (currentWorldLineIndex > 0) {
-    currentWorldLineIndex--;
-  } else {
-    currentWorldLineIndex = 31;
-  }
-  DivergenceMeter_showCurrentWorldLine();
-}
-
-/* Divergence Edit Mode */
-
-void DivergenceMeter_divergenceEditMode() {
-  if (just_entered_mode[DIVERGENCE_EDIT_MODE]) {
-    currentTube = 0;
-    just_entered_mode[DIVERGENCE_EDIT_MODE] = false;
-    display.tube[TUBE1] = 0;
-    display.tube[TUBE2] = BLANK;
-    display.tube[TUBE3] = BLANK;
-    display.tube[TUBE4] = BLANK;
-    display.tube[TUBE5] = BLANK;
-    display.tube[TUBE6] = BLANK;
-    display.tube[TUBE7] = BLANK;
-    display.tube[TUBE8] = BLANK;
-    display_update();
-  }
-
-  if (button_is_pressed[BUTTON2]) {
-    if (display.tube[currentTube] == BLANK) {
-      display.tube[currentTube] = 9;
-    } else if (display.tube[currentTube] > 0) {
-      display.tube[currentTube]--;
-    }
-    display_update();
-    _delay_ms(200);
-  } else if (button_is_pressed[BUTTON3]) {
-    if (display.tube[currentTube] < 9) {
-      display.tube[currentTube]++;
-    } else if (display.tube[currentTube] == 9) {
-      display.tube[currentTube] = BLANK;
-    }
-    display_update();
-    _delay_ms(200);
-  }
-
-  if (button_short_pressed[BUTTON4]) {
-    if (currentTube < 7) {
-      if (currentTube == TUBE1) {
-        display.tube[TUBE2] = RDP;
-        currentTube = TUBE3;  //SKIP TUBE2
-      } else {
-        currentTube++;
-      }
-      display.tube[currentTube] = 0;
-      display_update();
-    } else {
-      currentTube = 0;
-      current_mode = DIVERGENCE_MODE;
-      display_saveState();
-      DivergenceMeter_rollWorldLine(false);
-      display_restoreState();
-      display_update();
-    }
-    _delay_ms(200);
-  } else if (button_short_pressed[BUTTON5]) {
-    if (currentTube > 0) {
-      display.tube[currentTube] = BLANK;
-      if (currentTube == TUBE3) {
-        currentTube = 1;
-      } else {
-        currentTube--;
-      }
-      display_update();
-    }
-    _delay_ms(200);
-  }
-}
-
-/* Settings Mode Code */
-
-void DivergenceMeter_settingsMode() {
-  if (just_entered_mode[SETTINGS_MODE]) {
-    currentSetting = TIME_FORMAT_24H;
-    display.tube[TUBE1] = 0;
-    display.tube[TUBE2] = currentSetting;
-    display.tube[TUBE3] = BLANK;
-    display.tube[TUBE4] = BLANK;
-    display.tube[TUBE5] = BLANK;
-    display.tube[TUBE6] = BLANK;
-    display.tube[TUBE7] = 0;
-    display.tube[TUBE8] = settings.main[currentSetting];
-    display_update();
-    just_entered_mode[SETTINGS_MODE] = false;
-  }
-  if (button_is_pressed[BUTTON2] || button_is_pressed[BUTTON3]) {
-    display.tube[TUBE1] = 0;
-    display.tube[TUBE2] = currentSetting;
-    switch (currentSetting) {
-      case TIME_FORMAT_24H:
-      case DATE_FORMAT_DD_MM:
-        settings.main[currentSetting] = settings.main[currentSetting] ? 0 : 1;
-        break;
-      case REST_ON_HOUR:
-      case WAKE_ON_HOUR:
-        if (button_is_pressed[BUTTON3]) {
-          if (settings.main[currentSetting] < 24) {
-            settings.main[currentSetting]++;
-          }
-        } else if (button_is_pressed[BUTTON2]) {
-          if (settings.main[currentSetting] > 0) {
-            settings.main[currentSetting]--;
-          }
-        }
-        break;
-      case REST_ON_MINUTE:
-      case WAKE_ON_MINUTE:
-        if (button_is_pressed[BUTTON3]) {
-          if (settings.main[currentSetting] < 60) {
-            settings.main[currentSetting]++;
-          }
-        } else if (button_is_pressed[BUTTON2]) {
-          if (settings.main[currentSetting] > 0) {
-            settings.main[currentSetting]--;
-          }
-        }
-        break;
-    }
-    DivergenceMeter_updateSettingsDisplay();
-    _delay_ms(100);
-  } else if (button_short_pressed[BUTTON4]) {
-    if (currentSetting < WAKE_ON_MINUTE) {
-      currentSetting++;
-      DivergenceMeter_updateSettingsDisplay();
-    } else {
-      settings_writeSettingsDS3232();
-      current_mode = CLOCK_MODE;
-      just_entered_mode[CLOCK_MODE] = true;
-    }
-    _delay_ms(200);
-  } else if (button_short_pressed[BUTTON5]) {
-    if (currentSetting > TIME_FORMAT_24H) {
-      currentSetting--;
-      DivergenceMeter_updateSettingsDisplay();
-      _delay_ms(200);
-    }
-  }
-}
-
-void DivergenceMeter_updateSettingsDisplay() {
-  display.tube[TUBE2] = currentSetting;
-  display.tube[TUBE7] = (settings.main[currentSetting] / 10) % 10;
-  display.tube[TUBE8] = settings.main[currentSetting] % 10;
-  display_update();
 }
 
 /* Misc Code */

@@ -20,6 +20,8 @@
  * This is the code that handles the data shifting into the HV5622 Shift Registers.
  */
 
+#include "shiftregister.h"
+
 #include <stdint.h>
 #include <avr/io.h>
 

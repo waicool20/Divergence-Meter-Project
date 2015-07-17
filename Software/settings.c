@@ -37,6 +37,7 @@ const uint8_t PROGMEM default_settings[3] = { 10,  // DEFAULT_BRIGHTNESS
 Settings settings;
 
 void settings_init() {
+  i2c_init();
   settings_readDS3232();
   if (!settings.not_first_boot) {
     settings.main[BRIGHTNESS] = pgm_read_byte(&(default_settings[BRIGHTNESS]));

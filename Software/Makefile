@@ -13,7 +13,7 @@
 #
 ###############################################################################
 PROJECT_NAME = DivergenceMeter
-CSOURCE = DivergenceMeter.c util/shiftRegister.c util/display.c settings.c util/RNG.c
+CSOURCE = $(wildcard *.c) $(wildcard util/*.c) $(wildcard modes/*.c)
 ASMSOURCE = i2cmaster.S
 MCU = attiny861a
 MCU_FREQ = 8000000UL
