@@ -37,7 +37,7 @@ uint8_t currentSetting = 0;
 
 void settingsMode_run() {
   if (just_entered_mode[SETTINGS_MODE]) {
-    currentSetting = TIME_FORMAT_24H;
+    currentSetting = TIME_FORMAT_12H;
     display.tube[TUBE1] = 0;
     display.tube[TUBE2] = currentSetting;
     display.tube[TUBE3] = BLANK;
@@ -53,7 +53,7 @@ void settingsMode_run() {
     display.tube[TUBE1] = 0;
     display.tube[TUBE2] = currentSetting;
     switch (currentSetting) {
-      case TIME_FORMAT_24H:
+      case TIME_FORMAT_12H:
       case DATE_FORMAT_DD_MM:
         settings.main[currentSetting] = settings.main[currentSetting] ? 0 : 1;
         break;
@@ -95,7 +95,7 @@ void settingsMode_run() {
     }
     _delay_ms(200);
   } else if (button_short_pressed[BUTTON5]) {
-    if (currentSetting > TIME_FORMAT_24H) {
+    if (currentSetting > TIME_FORMAT_12H) {
       currentSetting--;
       DivergenceMeter_updateSettingsDisplay();
       _delay_ms(200);

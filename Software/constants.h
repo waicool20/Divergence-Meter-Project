@@ -38,7 +38,7 @@
 /* LP: Long Press                                                                                                         */
 /*                   |  ALL   |       CLOCK                         | DIVERGENCE                        |   SETTINGS    | */
 #define BUTTON1 4 // |  MODE  |                                     |                                   |               |
-#define BUTTON2 3 // |        | -/DATE                              | -/Prev        --|--EDIT MODE      | -             |
+#define BUTTON2 3 // |        | -/DATE              LP:Edit Time    | -/Prev        --|--EDIT MODE      | -             |
 #define BUTTON3 2 // |        | +/ARM/DISARM ALARM/ LP:Edit Alarm   | +/Next        --|                 | +             |
 #define BUTTON4 1 // |        | ROLL/CONFIRM                        | ROLL/CONFIRM                      | CONFIRM       |
 #define BUTTON5 0 // |        | BRIGHTNESS/BACK                     | BRIGHTNESS/BACK                   | Back          |

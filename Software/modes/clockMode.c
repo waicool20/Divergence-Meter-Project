@@ -64,8 +64,25 @@ void clockMode_run() {
 }
 
 void DivergenceMeter_displayCurrentTime() {
-  display.tube[TUBE1] = (settings.time[HOURS] >> 4) & 0x01;
-  display.tube[TUBE2] = settings.time[HOURS] & 0x0F;
+  uint8_t hour10 =  (settings.time[HOURS] >> 4) & 0x03;
+  uint8_t hour01 = settings.time[HOURS] & 0x0F;
+  if(settings.main[TIME_FORMAT_12H]){
+    uint8_t hour = hour10*10 + hour01;
+    if(hour >= 13){
+      hour -= 12; //PM
+    } else if(hour >= 12) {
+      //PM
+    } else if(hour >= 1) {
+      //AM
+    } else {
+      hour += 12; //AM
+    }
+    display.tube[TUBE1] = (hour/10) % 10;
+    display.tube[TUBE2] = hour % 10;
+  } else {
+    display.tube[TUBE1] = hour10;
+    display.tube[TUBE2] = hour01;
+  }
   display.tube[TUBE3] = (settings.time[SECONDS] & 0x01) ? LDP : RDP;
   display.tube[TUBE4] = (settings.time[MINUTES] >> 4);
   display.tube[TUBE5] = settings.time[MINUTES] & 0x0F;
@@ -76,11 +93,11 @@ void DivergenceMeter_displayCurrentTime() {
 }
 
 void DivergenceMeter_displayCurrentDate() {
-  display.tube[TUBE1] = (settings.time[DATE] >> 4) & 0x03;
-  display.tube[TUBE2] = settings.time[DATE] & 0x0F;
+  display.tube[TUBE1] = (settings.time[settings.main[DATE_FORMAT_DD_MM] ? DATE : MONTH] >> 4) & 0x03;
+  display.tube[TUBE2] = settings.time[settings.main[DATE_FORMAT_DD_MM] ? DATE : MONTH] & 0x0F;
   display.tube[TUBE3] = LDP;
-  display.tube[TUBE4] = (settings.time[MONTH] >> 4) & 0x01;
-  display.tube[TUBE5] = settings.time[MONTH] & 0x0F;
+  display.tube[TUBE4] = (settings.time[settings.main[DATE_FORMAT_DD_MM] ? MONTH : DATE] >> 4) & 0x01;
+  display.tube[TUBE5] = settings.time[settings.main[DATE_FORMAT_DD_MM] ? MONTH : DATE] & 0x0F;
   display.tube[TUBE3] = RDP;
   display.tube[TUBE7] = (settings.time[YEAR] >> 4);
   display.tube[TUBE8] = settings.time[YEAR] & 0x0F;

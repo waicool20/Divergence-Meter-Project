@@ -30,7 +30,7 @@
 #include "util/display.h"
 
 const uint8_t PROGMEM default_settings[3] = { 10,  // DEFAULT_BRIGHTNESS
-    1,  // TIME_FORMAT_24H
+    0,  // TIME_FORMAT_12H
     1,  // DATE_FORMAT_DD_MM
     };
 
@@ -41,8 +41,8 @@ void settings_init() {
   settings_readDS3232();
   if (!settings.not_first_boot) {
     settings.main[BRIGHTNESS] = pgm_read_byte(&(default_settings[BRIGHTNESS]));
-    settings.main[TIME_FORMAT_24H] = pgm_read_byte(
-        &(default_settings[TIME_FORMAT_24H]));
+    settings.main[TIME_FORMAT_12H] = pgm_read_byte(
+        &(default_settings[TIME_FORMAT_12H]));
     settings.main[DATE_FORMAT_DD_MM] = pgm_read_byte(
         &(default_settings[DATE_FORMAT_DD_MM]));
     settings.main[REST_ON_HOUR] = 0;
@@ -101,7 +101,7 @@ void settings_readSettingsDS3232() {
   i2c_write(0x14);
   i2c_rep_start(DS3232 + I2C_READ);
   settings.main[BRIGHTNESS] = i2c_readAck();
-  settings.main[TIME_FORMAT_24H] = i2c_readAck();
+  settings.main[TIME_FORMAT_12H] = i2c_readAck();
   settings.main[DATE_FORMAT_DD_MM] = i2c_readAck();
 
   settings.main[REST_ON_HOUR] = i2c_readAck();
@@ -117,6 +117,7 @@ void settings_writeDS3232() {
   settings_writeTimeDS3232();
   settings_writeAlarm1DS3232();
   settings_writeAlarm2DS3232();
+  settings_writeSettingsDS3232();
 }
 
 void settings_writeTimeDS3232() {
@@ -159,7 +160,7 @@ void settings_writeSettingsDS3232() {
   i2c_write(0x14);
 
   i2c_write(settings.main[BRIGHTNESS]);
-  i2c_write(settings.main[TIME_FORMAT_24H]);
+  i2c_write(settings.main[TIME_FORMAT_12H]);
   i2c_write(settings.main[DATE_FORMAT_DD_MM]);
 
   i2c_write(settings.main[REST_ON_HOUR]);

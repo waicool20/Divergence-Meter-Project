@@ -35,6 +35,7 @@
 
 #include "constants.h"
 #include "modes/clockMode.h"
+#include "modes/clockSetMode.h"
 #include "modes/divergenceEditMode.h"
 #include "modes/divergenceMode.h"
 #include "modes/settingsMode.h"
@@ -83,6 +84,9 @@ int main() {
         break;
       case SETTINGS_MODE:
         settingsMode_run();
+        break;
+      case CLOCK_SET_MODE:
+        clockSetMode_run();
         break;
     }
     set_sleep_mode(SLEEP_MODE_IDLE);
@@ -163,6 +167,10 @@ ISR(TIMER0_COMPA_vect) {
   }
 
   if (button_short_pressed[BUTTON1]) {
+    switch (current_mode){
+      case SETTINGS_MODE:
+        settings_writeSettingsDS3232();
+    }
     if (current_mode < DIVERGENCE_MODE) {
       current_mode++;
     } else {

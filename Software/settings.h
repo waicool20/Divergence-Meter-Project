@@ -39,7 +39,7 @@
 #define ALARM2_DAY_DATE 7
 
 #define BRIGHTNESS 0
-#define TIME_FORMAT_24H 1
+#define TIME_FORMAT_12H 1
 #define DATE_FORMAT_DD_MM 2
 
 #define REST_ON_HOUR 3

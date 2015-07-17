@@ -35,7 +35,6 @@ uint8_t currentTube = 0;
 void divergenceEditMode_run() {
   if (just_entered_mode[DIVERGENCE_EDIT_MODE]) {
     currentTube = 0;
-    just_entered_mode[DIVERGENCE_EDIT_MODE] = false;
     display.tube[TUBE1] = 0;
     display.tube[TUBE2] = BLANK;
     display.tube[TUBE3] = BLANK;
@@ -45,6 +44,7 @@ void divergenceEditMode_run() {
     display.tube[TUBE7] = BLANK;
     display.tube[TUBE8] = BLANK;
     display_update();
+    just_entered_mode[DIVERGENCE_EDIT_MODE] = false;
   }
 
   if (button_is_pressed[BUTTON2]) {
