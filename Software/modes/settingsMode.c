@@ -19,7 +19,6 @@
 #include "settingsMode.h"
 
 #include <stdint.h>
-#include <util/delay.h>
 
 #include "../DivergenceMeter.h"
 #include "../settings.h"
@@ -83,22 +82,21 @@ void settingsMode_run() {
         break;
     }
     DivergenceMeter_updateSettingsDisplay();
-    _delay_ms(100);
+    DivergenceMeter_delayCS(s2cs(0.1));
   } else if (button_short_pressed[BUTTON4]) {
     if (currentSetting < WAKE_ON_MINUTE) {
       currentSetting++;
       DivergenceMeter_updateSettingsDisplay();
     } else {
       settings_writeSettingsDS3232();
-      current_mode = CLOCK_MODE;
-      just_entered_mode[CLOCK_MODE] = true;
+      DivergenceMeter_switchMode(CLOCK_MODE);
     }
-    _delay_ms(200);
+    DivergenceMeter_delayCS(s2cs(0.1));
   } else if (button_short_pressed[BUTTON5]) {
     if (currentSetting > TIME_FORMAT_12H) {
       currentSetting--;
       DivergenceMeter_updateSettingsDisplay();
-      _delay_ms(200);
+      DivergenceMeter_delayCS(s2cs(0.1));
     }
   }
 }

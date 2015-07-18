@@ -27,7 +27,6 @@
 #include <stdint.h>
 #include <avr/io.h>
 #include <avr/pgmspace.h>
-#include <util/delay.h>
 
 #include "../constants.h"
 #include "../settings.h"

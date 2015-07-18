@@ -18,6 +18,8 @@
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
 
+#define s2cs(a) (a*100)
+
 #define TUBE1 0
 #define TUBE2 1
 #define TUBE3 2
@@ -30,8 +32,6 @@
 #define ROLL_SECONDS 2
 #define ROLL_INTERVAL_MS 25
 #define ROLL_DISPLAY_SECONDS 3
-
-#define BLINK_DURATION_MS 500
 
 #define ALARM_INT PA1
 
@@ -52,8 +52,10 @@
 #define BUTTON_SHORT_PRESS_MAX_DURATION_MS 60
 #define BUTTON_LONG_PRESS_MIN_DURATION_MS 1200
 
-#define DATE_DISPLAY_SECONDS 2
-#define BRIGHTNESS_DISPLAY_MS 250
+
+#define DATE_DISPLAY_S 1
+#define DAY_DISPLAY_S 1
+#define BRIGHTNESS_DISPLAY_S 0.25
 
 #define LE PB0
 #define BL PB1

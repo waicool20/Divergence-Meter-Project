@@ -19,7 +19,6 @@
 #include "divergenceEditMode.h"
 
 #include <stdint.h>
-#include <util/delay.h>
 
 #include "../DivergenceMeter.h"
 #include "../settings.h"
@@ -54,7 +53,7 @@ void divergenceEditMode_run() {
       display.tube[currentTube]--;
     }
     display_update();
-    _delay_ms(200);
+    DivergenceMeter_delayCS(s2cs(0.2));
   } else if (button_is_pressed[BUTTON3]) {
     if (display.tube[currentTube] < 9) {
       display.tube[currentTube]++;
@@ -62,7 +61,7 @@ void divergenceEditMode_run() {
       display.tube[currentTube] = BLANK;
     }
     display_update();
-    _delay_ms(200);
+    DivergenceMeter_delayCS(s2cs(0.2));
   }
 
   if (button_short_pressed[BUTTON4]) {
@@ -77,13 +76,13 @@ void divergenceEditMode_run() {
       display_update();
     } else {
       currentTube = 0;
-      current_mode = DIVERGENCE_MODE;
+      DivergenceMeter_switchMode(DIVERGENCE_MODE);
       display_saveState();
       DivergenceMeter_rollWorldLine(false);
       display_restoreState();
       display_update();
     }
-    _delay_ms(200);
+    DivergenceMeter_delayCS(s2cs(0.2));
   } else if (button_short_pressed[BUTTON5]) {
     if (currentTube > 0) {
       display.tube[currentTube] = BLANK;
@@ -94,6 +93,6 @@ void divergenceEditMode_run() {
       }
       display_update();
     }
-    _delay_ms(200);
+    DivergenceMeter_delayCS(s2cs(0.2));
   }
 }

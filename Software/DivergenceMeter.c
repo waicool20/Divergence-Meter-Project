@@ -31,7 +31,6 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 #include <avr/power.h>
-#include <util/delay.h>
 
 #include "constants.h"
 #include "modes/clockMode.h"
@@ -43,7 +42,6 @@
 #include "util/display.h"
 #include "util/RNG.h"
 
-
 FUSES = { .low = 0x82, .high = 0xDF, .extended = 0x01, };
 
 /* Prototypes */
@@ -52,9 +50,10 @@ void DivergenceMeter_init();
 
 /* Volatile Variables (Modifiable by ISR)*/
 
-volatile uint8_t clockCount = 0;
+static volatile uint8_t clockCount = 0;
+static volatile uint16_t delayCount = 0;
+static volatile uint8_t current_mode = 0;
 
-volatile uint8_t current_mode = 0;
 volatile bool just_entered_mode[6] =
     { false, false, false, false, false, false };
 
@@ -89,16 +88,7 @@ int main() {
         clockSetMode_run();
         break;
     }
-    set_sleep_mode(SLEEP_MODE_IDLE);
-    sleep_enable()
-    ;
-    sleep_bod_disable();
-    sei();
-    power_adc_disable();
-    power_usi_disable();
-    sleep_disable()
-    ;
-    power_adc_enable();
+    DivergenceMeter_sleep();
   }
   return 0;
 }
@@ -176,19 +166,20 @@ ISR(TIMER0_COMPA_vect) {
     } else {
       current_mode = CLOCK_MODE;
     }
-    _delay_ms(200);
     just_entered_mode[current_mode] = true;
   } else if (button_long_pressed[BUTTON1] && current_mode != SETTINGS_MODE) {
-    current_mode = SETTINGS_MODE;
-    just_entered_mode[current_mode] = true;
+    DivergenceMeter_switchMode(SETTINGS_MODE);
   }
   if (settings.main[BRIGHTNESS] == 10) {
     display_updateAdaptiveBrightness();
   }
   clockCount++;
-  if (clockCount > 9) {
+  if (clockCount > 9 && current_mode != CLOCK_SET_MODE) {
     settings_readTimeDS3232();
     clockCount = 0;
+  }
+  if(delayCount > 0){
+    delayCount--;
   }
   TCNT0H = 0x00;
   TCNT0L = 0x00;
@@ -223,7 +214,7 @@ void DivergenceMeter_rollWorldLine(bool rollTube2) {
       if (DivergenceMeter_shouldNotRoll()) {
         return;
       }
-      _delay_ms(10);
+      DivergenceMeter_delayCS(s2cs(0.01));
     }
   }
 }
@@ -234,11 +225,34 @@ void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2) {
     if (DivergenceMeter_shouldNotRoll()) {
       return;
     }
-    _delay_ms(10);
+    DivergenceMeter_delayCS(s2cs(0.01));
   }
 }
 
 void DivergenceMeter_showBrightness() {
   display_showCurrentBrightness();
-  _delay_ms(BRIGHTNESS_DISPLAY_MS);
+  DivergenceMeter_delayCS(s2cs(BRIGHTNESS_DISPLAY_S));
+}
+
+void DivergenceMeter_delayCS(uint16_t delay_cs){
+  delayCount = delay_cs;
+  while(delayCount){
+    DivergenceMeter_sleep();
+  }
+}
+
+void DivergenceMeter_sleep(){
+  set_sleep_mode(SLEEP_MODE_IDLE);
+  sleep_enable();
+  sleep_bod_disable();
+  sei();
+  power_adc_disable();
+  power_usi_disable();
+  sleep_disable();
+  power_adc_enable();
+}
+
+void DivergenceMeter_switchMode(uint8_t mode){
+  current_mode = mode;
+  just_entered_mode[mode] = true;
 }

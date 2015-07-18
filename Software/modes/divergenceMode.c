@@ -20,7 +20,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <util/delay.h>
 #include <avr/pgmspace.h>
 
 #include "../DivergenceMeter.h"
@@ -68,18 +67,17 @@ void divergenceMode_run() {
     just_entered_mode[DIVERGENCE_MODE] = false;
   }
   if (button_long_pressed[BUTTON2] && button_long_pressed[BUTTON3]) {
-    current_mode = DIVERGENCE_EDIT_MODE;
-    just_entered_mode[DIVERGENCE_EDIT_MODE] = true;
-  } else if (button_short_pressed[BUTTON2]) {
+    DivergenceMeter_switchMode(DIVERGENCE_EDIT_MODE);
+  } else if (button_is_pressed[BUTTON2]) {
     DivergenceMeter_rollWorldLine(true);
     DivergenceMeter_showPrevWorldLine();
     display_saveState();
-    _delay_ms(200);
-  } else if (button_short_pressed[BUTTON3]) {
+    DivergenceMeter_delayCS(s2cs(0.2));
+  } else if (button_is_pressed[BUTTON3]) {
     DivergenceMeter_rollWorldLine(true);
     DivergenceMeter_showNextWorldLine();
     display_saveState();
-    _delay_ms(200);
+    DivergenceMeter_delayCS(s2cs(0.2));
   } else if (button_is_pressed[BUTTON4]) {
     DivergenceMeter_rollWorldLine(true);
     display_saveState();

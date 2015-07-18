@@ -20,7 +20,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <util/delay.h>
 
 #include "../DivergenceMeter.h"
 #include "../settings.h"
@@ -29,8 +28,10 @@
 
 /* Prototypes */
 
-void DivergenceMeter_displayCurrentTime();
-void DivergenceMeter_displayCurrentDate();
+void clockMode_displayCurrentTime();
+void clockMode_displayDates();
+void clockMode_displayCurrentDate();
+void clockMode_displayCurrentDayOfWeek();
 
 /* Clock Mode Code */
 
@@ -42,15 +43,16 @@ void clockMode_run() {
     case 0x00:
       shouldRoll = true;
       DivergenceMeter_rollWorldLine(false);
-      DivergenceMeter_displayCurrentDate();
       shouldRoll = false;
-      _delay_ms((DATE_DISPLAY_SECONDS * 1000));
+      clockMode_displayDates();
       break;
   }
-  if (button_is_pressed[BUTTON2]) {
-    DivergenceMeter_displayCurrentDate();
-    _delay_ms((DATE_DISPLAY_SECONDS * 1000));
+  if (button_short_pressed[BUTTON2]) {
+    clockMode_displayDates();
+  } else if (button_long_pressed[BUTTON2]){
+    DivergenceMeter_switchMode(CLOCK_SET_MODE);
   } else if (button_short_pressed[BUTTON3]) {
+
 
   } else if (button_is_pressed[BUTTON4]) {
     shouldRoll = true;
@@ -60,10 +62,10 @@ void clockMode_run() {
     DivergenceMeter_showBrightness();
     return;
   }
-  DivergenceMeter_displayCurrentTime();
+  clockMode_displayCurrentTime();
 }
 
-void DivergenceMeter_displayCurrentTime() {
+void clockMode_displayCurrentTime() {
   uint8_t hour10 =  (settings.time[HOURS] >> 4) & 0x03;
   uint8_t hour01 = settings.time[HOURS] & 0x0F;
   if(settings.main[TIME_FORMAT_12H]){
@@ -84,22 +86,41 @@ void DivergenceMeter_displayCurrentTime() {
     display.tube[TUBE2] = hour01;
   }
   display.tube[TUBE3] = (settings.time[SECONDS] & 0x01) ? LDP : RDP;
-  display.tube[TUBE4] = (settings.time[MINUTES] >> 4);
+  display.tube[TUBE4] = settings.time[MINUTES] >> 4;
   display.tube[TUBE5] = settings.time[MINUTES] & 0x0F;
   display.tube[TUBE6] = (settings.time[SECONDS] & 0x01) ? LDP : RDP;
-  display.tube[TUBE7] = (settings.time[SECONDS] >> 4);
+  display.tube[TUBE7] = settings.time[SECONDS] >> 4;
   display.tube[TUBE8] = settings.time[SECONDS] & 0x0F;
   display_update();
 }
 
-void DivergenceMeter_displayCurrentDate() {
+void clockMode_displayDates(){
+  clockMode_displayCurrentDate();
+  DivergenceMeter_delayCS(s2cs(DATE_DISPLAY_S));
+  clockMode_displayCurrentDayOfWeek();
+  DivergenceMeter_delayCS(s2cs(DAY_DISPLAY_S));
+}
+
+void clockMode_displayCurrentDate() {
   display.tube[TUBE1] = (settings.time[settings.main[DATE_FORMAT_DD_MM] ? DATE : MONTH] >> 4) & 0x03;
   display.tube[TUBE2] = settings.time[settings.main[DATE_FORMAT_DD_MM] ? DATE : MONTH] & 0x0F;
   display.tube[TUBE3] = LDP;
   display.tube[TUBE4] = (settings.time[settings.main[DATE_FORMAT_DD_MM] ? MONTH : DATE] >> 4) & 0x01;
   display.tube[TUBE5] = settings.time[settings.main[DATE_FORMAT_DD_MM] ? MONTH : DATE] & 0x0F;
   display.tube[TUBE3] = RDP;
-  display.tube[TUBE7] = (settings.time[YEAR] >> 4);
+  display.tube[TUBE7] = settings.time[YEAR] >> 4;
   display.tube[TUBE8] = settings.time[YEAR] & 0x0F;
+  display_update();
+}
+
+void clockMode_displayCurrentDayOfWeek(){
+  display.tube[TUBE1] = BLANK;
+  display.tube[TUBE2] = BLANK;
+  display.tube[TUBE3] = BLANK;
+  display.tube[TUBE4] = 0;
+  display.tube[TUBE5] = settings.time[DAY_OF_WEEK];
+  display.tube[TUBE3] = BLANK;
+  display.tube[TUBE7] = BLANK;
+  display.tube[TUBE8] = BLANK;
   display_update();
 }

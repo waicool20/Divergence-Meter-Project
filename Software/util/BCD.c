@@ -15,31 +15,37 @@
 *  You should have received a copy of the GNU General Public License
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef DIVERGENCEMETER_H_
-#define DIVERGENCEMETER_H_
+
+#include "BCD.h"
 
 #include <stdint.h>
 #include <stdbool.h>
 
-extern bool shouldRoll;
+void BCD_inc(uint8_t *bcd){
+  uint8_t HBCD = ((*bcd) >> 4) & 0x0F;
+  uint8_t LBCD = (*bcd) & 0x0F;
+  uint8_t LBCD_inc = LBCD + 1;
+  if(LBCD_inc >= 10){
+    HBCD++;
+    LBCD = 0;
+  } else {
+    LBCD = LBCD_inc;
+  }
+  *bcd = (HBCD << 4) | LBCD;
+}
 
-extern volatile bool just_entered_mode[6];
+void BCD_dec(uint8_t *bcd){
+  uint8_t HBCD = ((*bcd) >> 4) & 0x0F;
+  uint8_t LBCD = (*bcd) & 0x0F;
+  uint8_t LBCD_dec = LBCD - 1;
+  if(LBCD_dec < 9){
+    LBCD = LBCD_dec;
+  } else {
+    if(HBCD > 0){
+      HBCD--;
+      LBCD = 9;
+    }
+  }
+  *bcd = (HBCD << 4) | LBCD;
+}
 
-extern volatile uint16_t button_count[5];
-extern volatile bool button_is_pressed[5];
-extern volatile bool button_short_pressed[5];
-extern volatile bool button_long_pressed[5];
-
-void DivergenceMeter_rollWorldLine(bool rollTube2);
-
-void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2);
-
-void DivergenceMeter_showBrightness();
-
-void DivergenceMeter_delayCS(uint16_t delay_cs);
-
-void DivergenceMeter_sleep();
-
-void DivergenceMeter_switchMode(uint8_t mode);
-
-#endif /* DIVERGENCEMETER_H_ */
