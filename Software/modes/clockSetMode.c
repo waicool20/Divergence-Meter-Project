@@ -58,7 +58,7 @@ void clockSetMode_run(){
     }
     DivergenceMeter_delayCS(s2cs(0.1));
   } else if (buttonIsPressed[BUTTON3]){
-    uint8_t upperLimit = 0x60;
+    uint8_t upperLimit = 0x59;
     switch(currentTimeSetting){
         case YEAR:
           upperLimit = 0x99;

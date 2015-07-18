@@ -24,4 +24,8 @@ void BCD_inc(uint8_t *bcd);
 
 void BCD_dec(uint8_t *bcd);
 
+uint8_t BCD_add(uint8_t bcd,uint8_t bcd2);
+
+uint8_t BCD_sub(uint8_t bcd,uint8_t bcd2);
+
 #endif /* UTIL_BCD_H_ */

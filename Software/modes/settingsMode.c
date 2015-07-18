@@ -24,6 +24,7 @@
 #include "../settings.h"
 #include "../constants.h"
 #include "../util/display.h"
+#include "../util/BCD.h"
 
 /* Prototypes */
 
@@ -38,55 +39,38 @@ void settingsMode_run() {
   if (justEnteredMode[SETTINGS_MODE]) {
     currentSetting = TIME_FORMAT_12H;
     display.tube[TUBE1] = 0;
-    display.tube[TUBE2] = currentSetting;
     display.tube[TUBE3] = BLANK;
     display.tube[TUBE4] = BLANK;
     display.tube[TUBE5] = BLANK;
     display.tube[TUBE6] = BLANK;
-    display.tube[TUBE7] = 0;
-    display.tube[TUBE8] = settings.main[currentSetting];
-    display_update();
     justEnteredMode[SETTINGS_MODE] = false;
   }
-  if (buttonIsPressed[BUTTON2] || buttonIsPressed[BUTTON3]) {
-    display.tube[TUBE1] = 0;
-    display.tube[TUBE2] = currentSetting;
+
+
+  if (buttonIsPressed[BUTTON2]) {
+    if (settings.main[currentSetting] > 0x00){
+      BCD_dec(&settings.main[currentSetting]);
+    }
+    DivergenceMeter_delayCS(s2cs(0.1));
+  } else if (buttonIsPressed[BUTTON3]){
+    uint8_t upperLimit = 0x01;
     switch (currentSetting) {
-      case TIME_FORMAT_12H:
-      case DATE_FORMAT_DD_MM:
-        settings.main[currentSetting] = settings.main[currentSetting] ? 0 : 1;
-        break;
       case REST_ON_HOUR:
       case WAKE_ON_HOUR:
-        if (buttonIsPressed[BUTTON3]) {
-          if (settings.main[currentSetting] < 24) {
-            settings.main[currentSetting]++;
-          }
-        } else if (buttonIsPressed[BUTTON2]) {
-          if (settings.main[currentSetting] > 0) {
-            settings.main[currentSetting]--;
-          }
-        }
+        upperLimit = 0x23;
         break;
       case REST_ON_MINUTE:
       case WAKE_ON_MINUTE:
-        if (buttonIsPressed[BUTTON3]) {
-          if (settings.main[currentSetting] < 60) {
-            settings.main[currentSetting]++;
-          }
-        } else if (buttonIsPressed[BUTTON2]) {
-          if (settings.main[currentSetting] > 0) {
-            settings.main[currentSetting]--;
-          }
-        }
+        upperLimit = 0x59;
         break;
     }
-    DivergenceMeter_updateSettingsDisplay();
+    if (settings.main[currentSetting] < upperLimit){
+      BCD_inc(&settings.main[currentSetting]);
+    }
     DivergenceMeter_delayCS(s2cs(0.1));
   } else if (buttonShortPressed[BUTTON4]) {
     if (currentSetting < WAKE_ON_MINUTE) {
       currentSetting++;
-      DivergenceMeter_updateSettingsDisplay();
     } else {
       settings_writeSettingsDS3232();
       DivergenceMeter_switchMode(CLOCK_MODE);
@@ -95,15 +79,11 @@ void settingsMode_run() {
   } else if (buttonShortPressed[BUTTON5]) {
     if (currentSetting > TIME_FORMAT_12H) {
       currentSetting--;
-      DivergenceMeter_updateSettingsDisplay();
       DivergenceMeter_delayCS(s2cs(0.1));
     }
   }
-}
-
-void DivergenceMeter_updateSettingsDisplay() {
   display.tube[TUBE2] = currentSetting;
-  display.tube[TUBE7] = (settings.main[currentSetting] / 10) % 10;
-  display.tube[TUBE8] = settings.main[currentSetting] % 10;
+  display.tube[TUBE7] = settings.main[currentSetting] >> 4;
+  display.tube[TUBE8] = settings.main[currentSetting] & 0x0F;
   display_update();
 }

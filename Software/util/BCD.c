@@ -49,3 +49,27 @@ void BCD_dec(uint8_t *bcd){
   *bcd = (HBCD << 4) | LBCD;
 }
 
+uint8_t BCD_add(uint8_t bcd,uint8_t bcd2){
+  uint16_t bcd_add = bcd + bcd2;
+  uint8_t carry = bcd_add >> 8;
+
+  uint8_t HBCD = (bcd_add >> 4) & 0x0F;
+  uint8_t LBCD = bcd_add & 0x0F;
+  if(carry || LBCD > 9 || HBCD > 9){
+    bcd_add += 6;
+  }
+  return bcd_add & 0xFF;
+}
+
+uint8_t BCD_sub(uint8_t bcd,uint8_t bcd2){
+  uint16_t bcd_sub = bcd - bcd2;
+  uint8_t carry = bcd_sub >> 8;
+
+  uint8_t HBCD = (bcd_sub >> 4) & 0x0F;
+  uint8_t LBCD = bcd_sub & 0x0F;
+  if(carry || LBCD > 9 || HBCD > 9){
+      bcd_sub -= 6;
+  }
+  return bcd_sub & 0xFF;
+}
+

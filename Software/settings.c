@@ -29,9 +29,10 @@
 #include "i2cmaster.h"
 #include "util/display.h"
 
-const uint8_t PROGMEM default_settings[3] = { 10,  // DEFAULT_BRIGHTNESS
+const uint8_t PROGMEM default_settings[3] = {
+    10,  // DEFAULT_BRIGHTNESS
     0,  // TIME_FORMAT_12H
-    1,  // DATE_FORMAT_DD_MM
+    0,  // DATE_FORMAT_DD_MM
     };
 
 Settings settings;
