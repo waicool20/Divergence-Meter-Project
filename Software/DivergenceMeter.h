@@ -23,12 +23,12 @@
 
 extern bool shouldRoll;
 
-extern volatile bool just_entered_mode[6];
+extern volatile bool justEnteredMode[6];
 
 extern volatile uint16_t button_count[5];
-extern volatile bool button_is_pressed[5];
-extern volatile bool button_short_pressed[5];
-extern volatile bool button_long_pressed[5];
+extern volatile bool buttonIsPressed[5];
+extern volatile bool buttonShortPressed[5];
+extern volatile bool buttonLongPressed[5];
 
 void DivergenceMeter_rollWorldLine(bool rollTube2);
 

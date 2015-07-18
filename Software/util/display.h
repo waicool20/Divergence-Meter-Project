@@ -25,7 +25,7 @@ typedef struct {
 } Display;
 
 extern Display display;
-extern Display last_display_state;
+extern Display lastDisplayState;
 
 void display_init();
 

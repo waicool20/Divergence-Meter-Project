@@ -46,21 +46,21 @@ FUSES = { .low = 0x82, .high = 0xDF, .extended = 0x01, };
 
 /* Prototypes */
 
-void DivergenceMeter_init();
+static void DivergenceMeter_init();
 
 /* Volatile Variables (Modifiable by ISR)*/
 
 static volatile uint8_t clockCount = 0;
 static volatile uint16_t delayCount = 0;
-static volatile uint8_t current_mode = 0;
+static volatile uint8_t currentMode = 0;
 
-volatile bool just_entered_mode[6] =
+volatile bool justEnteredMode[6] =
     { false, false, false, false, false, false };
 
 volatile uint16_t button_count[5] = { 0, 0, 0, 0, 0 };
-volatile bool button_is_pressed[5] = { false, false, false, false, false };
-volatile bool button_short_pressed[5] = { false, false, false, false, false };
-volatile bool button_long_pressed[5] = { false, false, false, false, false };
+volatile bool buttonIsPressed[5] = { false, false, false, false, false };
+volatile bool buttonShortPressed[5] = { false, false, false, false, false };
+volatile bool buttonLongPressed[5] = { false, false, false, false, false };
 
 /* Normal Variables */
 
@@ -71,7 +71,7 @@ bool shouldRoll = false;
 int main() {
   DivergenceMeter_init();
   while (1) {
-    switch (current_mode) {
+    switch (currentMode) {
       case CLOCK_MODE:
         clockMode_run();
         break;
@@ -93,16 +93,16 @@ int main() {
   return 0;
 }
 
-void tmr0_init() {
+static void tmr0_init() {
   TCCR0A = (1 << TCW0);  //16 bit width
   TCCR0B = (1 << CS01);  //x8 prescaler
-  unsigned int val = 10000;  // 10ms interval calculated by (Seconds)/(1/(((System Clock))/prescaler))
+  uint16_t val = 10000;  // 10ms interval calculated by (Seconds)/(1/(((System Clock))/prescaler))
   OCR0B = (val >> 8);
   OCR0A = (uint8_t) val;
   TIMSK = (1 << OCIE0A);  //Compare Match interrupt enable
 }
 
-void ADC_init() {
+static void ADC_init() {
   ADMUX = (1 << ADLAR) | 0x07;  //ADC channel 7
   ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADATE);
   ADCSRB = (1 << ADTS1) | (1 << ADTS0);
@@ -111,7 +111,7 @@ void ADC_init() {
     ;
 }
 
-void DivergenceMeter_init() {
+static void DivergenceMeter_init() {
   //Initialize IO
   DDRA &= ~((1 << ALARM_INT) | (1 << BUTTON1_PIN) | (1 << BUTTON2_PIN)
       | (1 << BUTTON3_PIN) | (1 << BUTTON4_PIN) | (1 << BUTTON5_PIN));
@@ -136,45 +136,45 @@ ISR(TIMER0_COMPA_vect) {
       button_count[i]++;
     } else {
       button_count[i] = 0;
-      button_is_pressed[i] = false;
-      button_short_pressed[i] = false;
-      button_long_pressed[i] = false;
+      buttonIsPressed[i] = false;
+      buttonShortPressed[i] = false;
+      buttonLongPressed[i] = false;
     }
 
     if (button_count[i] > (BUTTON_LONG_PRESS_MIN_DURATION_MS / 10)) {
-      button_is_pressed[i] = true;
-      button_short_pressed[i] = false;
-      button_long_pressed[i] = true;
+      buttonIsPressed[i] = true;
+      buttonShortPressed[i] = false;
+      buttonLongPressed[i] = true;
     } else if (button_count[i] > (BUTTON_SHORT_PRESS_MAX_DURATION_MS / 10)) {
-      button_is_pressed[i] = true;
-      button_short_pressed[i] = false;
-      button_long_pressed[i] = false;
+      buttonIsPressed[i] = true;
+      buttonShortPressed[i] = false;
+      buttonLongPressed[i] = false;
     } else if (button_count[i] >= (BUTTON_SHORT_PRESS_MIN_DURATION_MS / 10)) {
-      button_is_pressed[i] = true;
-      button_short_pressed[i] = true;
-      button_long_pressed[i] = false;
+      buttonIsPressed[i] = true;
+      buttonShortPressed[i] = true;
+      buttonLongPressed[i] = false;
     }
   }
 
-  if (button_short_pressed[BUTTON1]) {
-    switch (current_mode){
+  if (buttonShortPressed[BUTTON1]) {
+    switch (currentMode){
       case SETTINGS_MODE:
         settings_writeSettingsDS3232();
     }
-    if (current_mode < DIVERGENCE_MODE) {
-      current_mode++;
+    if (currentMode < DIVERGENCE_MODE) {
+      currentMode++;
     } else {
-      current_mode = CLOCK_MODE;
+      currentMode = CLOCK_MODE;
     }
-    just_entered_mode[current_mode] = true;
-  } else if (button_long_pressed[BUTTON1] && current_mode != SETTINGS_MODE) {
+    justEnteredMode[currentMode] = true;
+  } else if (buttonLongPressed[BUTTON1] && currentMode != SETTINGS_MODE) {
     DivergenceMeter_switchMode(SETTINGS_MODE);
   }
   if (settings.main[BRIGHTNESS] == 10) {
     display_updateAdaptiveBrightness();
   }
   clockCount++;
-  if (clockCount > 9 && current_mode != CLOCK_SET_MODE) {
+  if (clockCount > 9 && currentMode != CLOCK_SET_MODE) {
     settings_readTimeDS3232();
     clockCount = 0;
   }
@@ -187,8 +187,8 @@ ISR(TIMER0_COMPA_vect) {
 
 /* Misc Code */
 
-bool DivergenceMeter_shouldNotRoll() {
-  return current_mode != DIVERGENCE_MODE && !shouldRoll;
+static bool DivergenceMeter_shouldNotRoll() {
+  return currentMode != DIVERGENCE_MODE && !shouldRoll;
 }
 
 void DivergenceMeter_rollWorldLine(bool rollTube2) {
@@ -253,6 +253,6 @@ void DivergenceMeter_sleep(){
 }
 
 void DivergenceMeter_switchMode(uint8_t mode){
-  current_mode = mode;
-  just_entered_mode[mode] = true;
+  currentMode = mode;
+  justEnteredMode[mode] = true;
 }

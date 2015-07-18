@@ -35,16 +35,16 @@ static uint8_t currentTimeSetting;
 /* Clock Set Mode */
 
 void clockSetMode_run(){
-  if (just_entered_mode[CLOCK_SET_MODE]) {
+  if (justEnteredMode[CLOCK_SET_MODE]) {
     currentTimeSetting = YEAR;
     display.tube[TUBE1] = 0;
     display.tube[TUBE3] = BLANK;
     display.tube[TUBE4] = BLANK;
     display.tube[TUBE5] = BLANK;
     display.tube[TUBE6] = BLANK;
-    just_entered_mode[CLOCK_SET_MODE] = false;
+    justEnteredMode[CLOCK_SET_MODE] = false;
   }
-  if(button_is_pressed[BUTTON2]){
+  if(buttonIsPressed[BUTTON2]){
     uint8_t lowerLimit = 0x00;
     switch(currentTimeSetting){
         case MONTH:
@@ -57,7 +57,7 @@ void clockSetMode_run(){
       BCD_dec(&settings.time[currentTimeSetting]);
     }
     DivergenceMeter_delayCS(s2cs(0.1));
-  } else if (button_is_pressed[BUTTON3]){
+  } else if (buttonIsPressed[BUTTON3]){
     uint8_t upperLimit = 0x60;
     switch(currentTimeSetting){
         case YEAR:
@@ -80,7 +80,7 @@ void clockSetMode_run(){
       BCD_inc(&settings.time[currentTimeSetting]);
     }
     DivergenceMeter_delayCS(s2cs(0.1));
-  } else if (button_is_pressed[BUTTON4]){
+  } else if (buttonIsPressed[BUTTON4]){
     if(currentTimeSetting > SECONDS){
       currentTimeSetting--;
     } else if (currentTimeSetting == SECONDS){
@@ -88,7 +88,7 @@ void clockSetMode_run(){
       DivergenceMeter_switchMode(CLOCK_MODE);
     }
     DivergenceMeter_delayCS(s2cs(0.2));
-  } else if (button_is_pressed[BUTTON5]){
+  } else if (buttonIsPressed[BUTTON5]){
     if(currentTimeSetting < YEAR){
       currentTimeSetting++;
     }

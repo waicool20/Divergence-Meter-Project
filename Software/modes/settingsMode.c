@@ -35,7 +35,7 @@ uint8_t currentSetting = 0;
 /* Settings Mode Code */
 
 void settingsMode_run() {
-  if (just_entered_mode[SETTINGS_MODE]) {
+  if (justEnteredMode[SETTINGS_MODE]) {
     currentSetting = TIME_FORMAT_12H;
     display.tube[TUBE1] = 0;
     display.tube[TUBE2] = currentSetting;
@@ -46,9 +46,9 @@ void settingsMode_run() {
     display.tube[TUBE7] = 0;
     display.tube[TUBE8] = settings.main[currentSetting];
     display_update();
-    just_entered_mode[SETTINGS_MODE] = false;
+    justEnteredMode[SETTINGS_MODE] = false;
   }
-  if (button_is_pressed[BUTTON2] || button_is_pressed[BUTTON3]) {
+  if (buttonIsPressed[BUTTON2] || buttonIsPressed[BUTTON3]) {
     display.tube[TUBE1] = 0;
     display.tube[TUBE2] = currentSetting;
     switch (currentSetting) {
@@ -58,11 +58,11 @@ void settingsMode_run() {
         break;
       case REST_ON_HOUR:
       case WAKE_ON_HOUR:
-        if (button_is_pressed[BUTTON3]) {
+        if (buttonIsPressed[BUTTON3]) {
           if (settings.main[currentSetting] < 24) {
             settings.main[currentSetting]++;
           }
-        } else if (button_is_pressed[BUTTON2]) {
+        } else if (buttonIsPressed[BUTTON2]) {
           if (settings.main[currentSetting] > 0) {
             settings.main[currentSetting]--;
           }
@@ -70,11 +70,11 @@ void settingsMode_run() {
         break;
       case REST_ON_MINUTE:
       case WAKE_ON_MINUTE:
-        if (button_is_pressed[BUTTON3]) {
+        if (buttonIsPressed[BUTTON3]) {
           if (settings.main[currentSetting] < 60) {
             settings.main[currentSetting]++;
           }
-        } else if (button_is_pressed[BUTTON2]) {
+        } else if (buttonIsPressed[BUTTON2]) {
           if (settings.main[currentSetting] > 0) {
             settings.main[currentSetting]--;
           }
@@ -83,7 +83,7 @@ void settingsMode_run() {
     }
     DivergenceMeter_updateSettingsDisplay();
     DivergenceMeter_delayCS(s2cs(0.1));
-  } else if (button_short_pressed[BUTTON4]) {
+  } else if (buttonShortPressed[BUTTON4]) {
     if (currentSetting < WAKE_ON_MINUTE) {
       currentSetting++;
       DivergenceMeter_updateSettingsDisplay();
@@ -92,7 +92,7 @@ void settingsMode_run() {
       DivergenceMeter_switchMode(CLOCK_MODE);
     }
     DivergenceMeter_delayCS(s2cs(0.1));
-  } else if (button_short_pressed[BUTTON5]) {
+  } else if (buttonShortPressed[BUTTON5]) {
     if (currentSetting > TIME_FORMAT_12H) {
       currentSetting--;
       DivergenceMeter_updateSettingsDisplay();

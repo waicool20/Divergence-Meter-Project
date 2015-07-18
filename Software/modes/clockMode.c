@@ -36,8 +36,8 @@ void clockMode_displayCurrentDayOfWeek();
 /* Clock Mode Code */
 
 void clockMode_run() {
-  if (just_entered_mode[CLOCK_MODE]) {
-    just_entered_mode[CLOCK_MODE] = false;
+  if (justEnteredMode[CLOCK_MODE]) {
+    justEnteredMode[CLOCK_MODE] = false;
   }
   switch (settings.time[SECONDS]) {
     case 0x00:
@@ -47,17 +47,17 @@ void clockMode_run() {
       clockMode_displayDates();
       break;
   }
-  if (button_short_pressed[BUTTON2]) {
+  if (buttonShortPressed[BUTTON2]) {
     clockMode_displayDates();
-  } else if (button_long_pressed[BUTTON2]){
+  } else if (buttonLongPressed[BUTTON2]){
     DivergenceMeter_switchMode(CLOCK_SET_MODE);
-  } else if (button_short_pressed[BUTTON3]) {
+  } else if (buttonShortPressed[BUTTON3]) {
 
 
-  } else if (button_is_pressed[BUTTON4]) {
+  } else if (buttonIsPressed[BUTTON4]) {
     shouldRoll = true;
     DivergenceMeter_rollWorldLineWithDelay(true);
-  } else if (button_is_pressed[BUTTON5]) {
+  } else if (buttonIsPressed[BUTTON5]) {
     display_toggleBrightness();
     DivergenceMeter_showBrightness();
     return;

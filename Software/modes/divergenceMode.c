@@ -61,27 +61,27 @@ uint8_t currentWorldLineIndex = 0;
 /* Divergence Mode Code */
 
 void divergenceMode_run() {
-  if (just_entered_mode[DIVERGENCE_MODE]) {
+  if (justEnteredMode[DIVERGENCE_MODE]) {
     DivergenceMeter_rollWorldLine(true);
     display_saveState();
-    just_entered_mode[DIVERGENCE_MODE] = false;
+    justEnteredMode[DIVERGENCE_MODE] = false;
   }
-  if (button_long_pressed[BUTTON2] && button_long_pressed[BUTTON3]) {
+  if (buttonLongPressed[BUTTON2] && buttonLongPressed[BUTTON3]) {
     DivergenceMeter_switchMode(DIVERGENCE_EDIT_MODE);
-  } else if (button_is_pressed[BUTTON2]) {
+  } else if (buttonIsPressed[BUTTON2]) {
     DivergenceMeter_rollWorldLine(true);
     DivergenceMeter_showPrevWorldLine();
     display_saveState();
     DivergenceMeter_delayCS(s2cs(0.2));
-  } else if (button_is_pressed[BUTTON3]) {
+  } else if (buttonIsPressed[BUTTON3]) {
     DivergenceMeter_rollWorldLine(true);
     DivergenceMeter_showNextWorldLine();
     display_saveState();
     DivergenceMeter_delayCS(s2cs(0.2));
-  } else if (button_is_pressed[BUTTON4]) {
+  } else if (buttonIsPressed[BUTTON4]) {
     DivergenceMeter_rollWorldLine(true);
     display_saveState();
-  } else if (button_is_pressed[BUTTON5]) {
+  } else if (buttonIsPressed[BUTTON5]) {
     display_toggleBrightness();
     DivergenceMeter_showBrightness();
     return;

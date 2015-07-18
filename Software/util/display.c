@@ -36,7 +36,7 @@ const uint16_t PROGMEM brightnessLevels[10] = { 25, 50, 75, 100, 125, 150, 175,
     200, 225, 250 };  //Somehow won't work with uint8_t
 
 Display display;
-Display last_display_state;
+Display lastDisplayState;
 
 void tmr1_init() {
   TCCR1A |= (1 << COM1A1) | (1 << PWM1A);
@@ -254,9 +254,9 @@ void display_toggleBrightness() {
 }
 
 void display_saveState() {
-  last_display_state = display;
+  lastDisplayState = display;
 }
 
 void display_restoreState() {
-  display = last_display_state;
+  display = lastDisplayState;
 }
