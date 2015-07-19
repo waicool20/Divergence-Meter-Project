@@ -1,20 +1,20 @@
 /*  GPLv3 License
-*  
-*  	Copyright (c) Divergence Meter Project by waicool20
-*  	
-*  This program is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation, either version 3 of the License, or
-*  (at your option) any later version.
-*  
-*  This program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*  
-*  You should have received a copy of the GNU General Public License
-*  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ *  
+ *  	Copyright (c) Divergence Meter Project by waicool20
+ *  	
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "clockSetMode.h"
 
@@ -34,7 +34,7 @@ static uint8_t currentTimeSetting;
 
 /* Clock Set Mode */
 
-void clockSetMode_run(){
+void clockSetMode_run() {
   if (justEnteredMode[CLOCK_SET_MODE]) {
     currentTimeSetting = YEAR;
     display_setTube(TUBE1, 0, false, false);
@@ -44,66 +44,66 @@ void clockSetMode_run(){
     display_setTube(TUBE6, BLANK, false, false);
     justEnteredMode[CLOCK_SET_MODE] = false;
   }
-  if(buttonIsPressed[BUTTON2]){
+  if (buttonIsPressed[BUTTON2]) {
     uint8_t lowerLimit = 0x00;
-    switch(currentTimeSetting){
-        case MONTH:
-        case DATE:
-        case DAY_OF_WEEK:
-          lowerLimit = 0x01;
-          break;
-      }
-    if (settings.time[currentTimeSetting] > lowerLimit){
+    switch (currentTimeSetting) {
+      case MONTH:
+      case DATE:
+      case DAY_OF_WEEK:
+        lowerLimit = 0x01;
+        break;
+    }
+    if (settings.time[currentTimeSetting] > lowerLimit) {
       BCD_dec(&settings.time[currentTimeSetting]);
     }
     DivergenceMeter_delayCS(s2cs(0.1));
-  } else if (buttonIsPressed[BUTTON3]){
+  } else if (buttonIsPressed[BUTTON3]) {
     uint8_t upperLimit = 0x59;
-    switch(currentTimeSetting){
-        case YEAR:
-          upperLimit = 0x99;
-          break;
-        case MONTH:
-          upperLimit = 0x12;
-          break;
-        case DATE:
-          upperLimit = 0x31;
-          break;
-        case DAY_OF_WEEK:
-          upperLimit = 0x07;
-          break;
-        case HOURS:
-          upperLimit = 0x23;
-          break;
-      }
-    if (settings.time[currentTimeSetting] < upperLimit){
+    switch (currentTimeSetting) {
+      case YEAR:
+        upperLimit = 0x99;
+        break;
+      case MONTH:
+        upperLimit = 0x12;
+        break;
+      case DATE:
+        upperLimit = 0x31;
+        break;
+      case DAY_OF_WEEK:
+        upperLimit = 0x07;
+        break;
+      case HOURS:
+        upperLimit = 0x23;
+        break;
+    }
+    if (settings.time[currentTimeSetting] < upperLimit) {
       BCD_inc(&settings.time[currentTimeSetting]);
     }
     DivergenceMeter_delayCS(s2cs(0.1));
-  } else if (buttonIsPressed[BUTTON4]){
-    if(currentTimeSetting > SECONDS){
+  } else if (buttonIsPressed[BUTTON4]) {
+    if (currentTimeSetting > SECONDS) {
       currentTimeSetting--;
-    } else if (currentTimeSetting == SECONDS){
+    } else if (currentTimeSetting == SECONDS) {
       settings_writeTimeDS3232();
       DivergenceMeter_switchMode(CLOCK_MODE, false);
     }
     DivergenceMeter_delayCS(s2cs(0.2));
-  } else if (buttonIsPressed[BUTTON5]){
-    if(currentTimeSetting < YEAR){
+  } else if (buttonIsPressed[BUTTON5]) {
+    if (currentTimeSetting < YEAR) {
       currentTimeSetting++;
     }
     DivergenceMeter_delayCS(s2cs(0.2));
   }
 
-
   display_setTube(TUBE2, (7 - currentTimeSetting), false, false);
-  switch(currentTimeSetting){
+  switch (currentTimeSetting) {
     case YEAR:
       display_setTube(TUBE7, (settings.time[YEAR] >> 4), false, false);
       display_setTube(TUBE8, (settings.time[YEAR] & 0x0F), false, false);
       break;
     case MONTH:
-      display_setTube(TUBE7, ((settings.time[MONTH] >> 4) & 0x01), false, false);
+      display_setTube(TUBE7, ((settings.time[MONTH] >> 4) & 0x01), false,
+      false);
       display_setTube(TUBE8, (settings.time[MONTH] & 0x0F), false, false);
       break;
     case DATE:
@@ -115,7 +115,8 @@ void clockSetMode_run(){
       display_setTube(TUBE8, (settings.time[DAY_OF_WEEK]), false, false);
       break;
     case HOURS:
-      display_setTube(TUBE7, ((settings.time[HOURS] >> 4) & 0x03), false, false);
+      display_setTube(TUBE7, ((settings.time[HOURS] >> 4) & 0x03), false,
+      false);
       display_setTube(TUBE8, (settings.time[HOURS] & 0x0F), false, false);
       break;
     case MINUTES:
