@@ -60,15 +60,15 @@ void handleGenericTube(uint8_t tube) {
   switch (display.tube[tube]) {
     case 0:
       SRSendZeros(10);
-      SRSendOnes(1);
-      SRSendZeros(1);
+      SRSendOne();
+      SRSendZero();
       break;
     case RDP:
       SRSendZeros(11);
-      SRSendOnes(1);
+      SRSendOne();
       break;
     case LDP:
-      SRSendOnes(1);
+      SRSendOne();
       SRSendZeros(11);
       break;
     case BLANK:
@@ -76,7 +76,7 @@ void handleGenericTube(uint8_t tube) {
       break;
     default:
       SRSendZeros(display.tube[tube]);
-      SRSendOnes(1);
+      SRSendOne();
       SRSendZeros(11 - display.tube[tube]);
       break;
   }
@@ -91,19 +91,19 @@ void handleShiftRegister1() {
       break;
     case 0:
       SRSendZeros(6);
-      SRSendOnes(1);
-      SRSendZeros(1);
+      SRSendOne();
+      SRSendZero();
       break;
     case RDP:
       SRSendZeros(7);
-      SRSendOnes(1);
+      SRSendOne();
       break;
     case BLANK:
       SRSendZeros(8);
       break;
     default:
       SRSendZeros(display.tube[TUBE6] - 4);
-      SRSendOnes(1);
+      SRSendOne();
       SRSendZeros(11 - display.tube[TUBE6]);
       break;
   }
@@ -117,17 +117,17 @@ void handleShiftRegister2() {
     case 8:
     case 9:
       SRSendZeros(display.tube[TUBE3] - 8);
-      SRSendOnes(1);
+      SRSendOne();
       SRSendZeros(11 - display.tube[TUBE3]);
       break;
     case 0:
       SRSendZeros(2);
-      SRSendOnes(1);
-      SRSendZeros(1);
+      SRSendOne();
+      SRSendZero();
       break;
     case RDP:
       SRSendZeros(3);
-      SRSendOnes(1);
+      SRSendOne();
       break;
     case BLANK:
       SRSendZeros(4);
@@ -145,11 +145,11 @@ void handleShiftRegister2() {
     case 2:
     case 3:
       SRSendZeros(display.tube[TUBE6]);
-      SRSendOnes(1);
+      SRSendOne();
       SRSendZeros(3 - display.tube[TUBE6]);
       break;
     case LDP:
-      SRSendOnes(1);
+      SRSendOne();
       SRSendZeros(3);
       break;
     case BLANK:
@@ -173,7 +173,7 @@ void handleShiftRegister3() {
       SRSendZeros(8);
       break;
     case LDP:
-      SRSendOnes(1);
+      SRSendOne();
       SRSendZeros(7);
       break;
     case BLANK:
@@ -181,7 +181,7 @@ void handleShiftRegister3() {
       break;
     default:
       SRSendZeros(display.tube[TUBE3]);
-      SRSendOnes(1);
+      SRSendOne();
       SRSendZeros(7 - display.tube[TUBE3]);
       break;
   }

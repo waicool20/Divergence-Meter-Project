@@ -32,4 +32,8 @@ void SRSendOnes(uint8_t i);
 
 void SRSendZeros(uint8_t i);
 
+void SRSendOne();
+
+void SRSendZero();
+
 #endif /* SHIFT_REGISTER_H_ */
