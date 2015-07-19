@@ -197,18 +197,17 @@ void DivergenceMeter_rollWorldLine(bool rollTube2) {
       return;
     }
     if (i > 1) {
-      display.tube[TUBE1] = RNG_nextChar();
+      display_setTube(TUBE1, RNG_nextChar(),false,false);
     } else {
-      display.tube[TUBE1] =
-          RNG_nextChar() == 9 ? BLANK : (RNG_nextChar() == 8 ? 1 : 0);
+      display_setTube(TUBE1, (RNG_nextChar() == 9 ? BLANK : (RNG_nextChar() == 8 ? 1 : 0)),false,false);
     }
-    display.tube[TUBE2] = rollTube2 ? RDP : RNG_nextChar();
-    display.tube[TUBE3] = RNG_nextChar();
-    display.tube[TUBE4] = RNG_nextChar();
-    display.tube[TUBE5] = RNG_nextChar();
-    display.tube[TUBE6] = RNG_nextChar();
-    display.tube[TUBE7] = RNG_nextChar();
-    display.tube[TUBE8] = RNG_nextChar();
+    rollTube2 ? display_setTube(TUBE2,BLANK,true,false) : display_setTube(TUBE2,RNG_nextChar(),false,false);
+    display_setTube(TUBE3, RNG_nextChar(),false,false);
+    display_setTube(TUBE4, RNG_nextChar(),false,false);
+    display_setTube(TUBE5, RNG_nextChar(),false,false);
+    display_setTube(TUBE6, RNG_nextChar(),false,false);
+    display_setTube(TUBE7, RNG_nextChar(),false,false);
+    display_setTube(TUBE8, RNG_nextChar(),false,false);
     display_update();
     for (int i = (ROLL_INTERVAL_MS / 10); i > 0; i--) {
       if (DivergenceMeter_shouldNotRoll()) {

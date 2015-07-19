@@ -64,9 +64,7 @@
 #define SPEAKER PB5
 #define HV_DISABLE PB6
 
-#define RDP 10
-#define LDP 11
-#define BLANK 12
+#define BLANK 10
 #define DS3232 0xD0
 
 #define CLOCK_MODE 0

@@ -38,11 +38,11 @@ uint8_t currentSetting = 0;
 void settingsMode_run() {
   if (justEnteredMode[SETTINGS_MODE]) {
     currentSetting = TIME_FORMAT_12H;
-    display.tube[TUBE1] = 0;
-    display.tube[TUBE3] = BLANK;
-    display.tube[TUBE4] = BLANK;
-    display.tube[TUBE5] = BLANK;
-    display.tube[TUBE6] = BLANK;
+    display_setTube(TUBE1, (0), false, false);
+    display_setTube(TUBE3, (BLANK), false, false);
+    display_setTube(TUBE4, (BLANK), false, false);
+    display_setTube(TUBE5, (BLANK), false, false);
+    display_setTube(TUBE6, (BLANK), false, false);
     justEnteredMode[SETTINGS_MODE] = false;
   }
 
@@ -82,8 +82,8 @@ void settingsMode_run() {
       DivergenceMeter_delayCS(s2cs(0.1));
     }
   }
-  display.tube[TUBE2] = currentSetting;
-  display.tube[TUBE7] = settings.main[currentSetting] >> 4;
-  display.tube[TUBE8] = settings.main[currentSetting] & 0x0F;
+  display_setTube(TUBE2, (currentSetting), false, false);
+  display_setTube(TUBE7, (settings.main[currentSetting] >> 4), false, false);
+  display_setTube(TUBE8, (settings.main[currentSetting] & 0x0F), false, false);
   display_update();
 }
