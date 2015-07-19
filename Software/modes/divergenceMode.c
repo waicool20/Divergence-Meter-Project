@@ -67,7 +67,7 @@ void divergenceMode_run() {
     justEnteredMode[DIVERGENCE_MODE] = false;
   }
   if (buttonLongPressed[BUTTON2] && buttonLongPressed[BUTTON3]) {
-    DivergenceMeter_switchMode(DIVERGENCE_EDIT_MODE);
+    DivergenceMeter_switchMode(DIVERGENCE_EDIT_MODE, false);
   } else if (buttonIsPressed[BUTTON2]) {
     DivergenceMeter_rollWorldLine(true);
     DivergenceMeter_showPrevWorldLine();

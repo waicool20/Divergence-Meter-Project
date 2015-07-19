@@ -73,7 +73,7 @@ void settingsMode_run() {
       currentSetting++;
     } else {
       settings_writeSettingsDS3232();
-      DivergenceMeter_switchMode(CLOCK_MODE);
+      DivergenceMeter_switchMode(CLOCK_MODE, false);
     }
     DivergenceMeter_delayCS(s2cs(0.1));
   } else if (buttonShortPressed[BUTTON5]) {

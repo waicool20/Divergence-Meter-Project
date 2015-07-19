@@ -85,7 +85,7 @@ void clockSetMode_run(){
       currentTimeSetting--;
     } else if (currentTimeSetting == SECONDS){
       settings_writeTimeDS3232();
-      DivergenceMeter_switchMode(CLOCK_MODE);
+      DivergenceMeter_switchMode(CLOCK_MODE, false);
     }
     DivergenceMeter_delayCS(s2cs(0.2));
   } else if (buttonIsPressed[BUTTON5]){

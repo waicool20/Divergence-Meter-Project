@@ -51,7 +51,7 @@ void clockMode_run() {
   if (buttonShortPressed[BUTTON2]) {
     clockMode_displayDates();
   } else if (buttonLongPressed[BUTTON2]){
-    DivergenceMeter_switchMode(CLOCK_SET_MODE);
+    DivergenceMeter_switchMode(CLOCK_SET_MODE, false);
   } else if (buttonShortPressed[BUTTON3]) {
 
 

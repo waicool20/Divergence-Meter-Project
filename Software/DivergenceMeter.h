@@ -40,6 +40,6 @@ void DivergenceMeter_delayCS(uint16_t delay_cs);
 
 void DivergenceMeter_sleep();
 
-void DivergenceMeter_switchMode(uint8_t mode);
+void DivergenceMeter_switchMode(uint8_t mode, bool silent);
 
 #endif /* DIVERGENCEMETER_H_ */

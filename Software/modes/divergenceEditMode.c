@@ -76,7 +76,7 @@ void divergenceEditMode_run() {
       display_update();
     } else {
       currentTube = 0;
-      DivergenceMeter_switchMode(DIVERGENCE_MODE);
+      DivergenceMeter_switchMode(DIVERGENCE_MODE, true);
       display_saveState();
       DivergenceMeter_rollWorldLine(false);
       display_restoreState();
@@ -87,7 +87,8 @@ void divergenceEditMode_run() {
     if (currentTube > 0) {
       display.tube[currentTube] = BLANK;
       if (currentTube == TUBE3) {
-        currentTube = 1;
+        display.tube[TUBE2] = BLANK;
+        currentTube = TUBE1;
       } else {
         currentTube--;
       }

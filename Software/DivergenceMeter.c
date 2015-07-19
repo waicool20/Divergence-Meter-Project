@@ -168,7 +168,7 @@ ISR(TIMER0_COMPA_vect) {
     }
     justEnteredMode[currentMode] = true;
   } else if (buttonLongPressed[BUTTON1] && currentMode != SETTINGS_MODE) {
-    DivergenceMeter_switchMode(SETTINGS_MODE);
+    DivergenceMeter_switchMode(SETTINGS_MODE, false);
   }
   if (settings.main[BRIGHTNESS] == 10) {
     display_updateAdaptiveBrightness();
@@ -252,7 +252,7 @@ void DivergenceMeter_sleep(){
   power_adc_enable();
 }
 
-void DivergenceMeter_switchMode(uint8_t mode){
+void DivergenceMeter_switchMode(uint8_t mode, bool silent){
   currentMode = mode;
-  justEnteredMode[mode] = true;
+  justEnteredMode[mode] = !silent;
 }
