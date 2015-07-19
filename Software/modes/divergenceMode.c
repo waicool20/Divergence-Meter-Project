@@ -29,9 +29,9 @@
 
 /* Prototypes */
 
-void DivergenceMeter_showCurrentWorldLine();
-void DivergenceMeter_showPrevWorldLine();
-void DivergenceMeter_showNextWorldLine();
+static void DivergenceMeter_showCurrentWorldLine();
+static void DivergenceMeter_showPrevWorldLine();
+static void DivergenceMeter_showNextWorldLine();
 
 /* World line constants */
 
@@ -56,7 +56,7 @@ const uint8_t PROGMEM WORLD_LINES[32][7] = {
 
 /* Variables */
 
-uint8_t currentWorldLineIndex = 0;
+uint8_t currentWorldLineIndex;
 
 /* Divergence Mode Code */
 
@@ -90,7 +90,7 @@ void divergenceMode_run() {
   display_update();
 }
 
-void DivergenceMeter_showCurrentWorldLine() {
+static void DivergenceMeter_showCurrentWorldLine() {
   display_setTube(TUBE1, (pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE1]))), false, false);
   display_setTube(TUBE2, BLANK, true, false);
   display_setTube(TUBE3, (pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE3-1]))), false, false);
@@ -102,20 +102,12 @@ void DivergenceMeter_showCurrentWorldLine() {
   display_update();
 }
 
-void DivergenceMeter_showNextWorldLine() {
-  if (currentWorldLineIndex < 31) {
-    currentWorldLineIndex++;
-  } else {
-    currentWorldLineIndex = 0;
-  }
+static void DivergenceMeter_showNextWorldLine() {
+  currentWorldLineIndex = currentWorldLineIndex < 31 ? currentWorldLineIndex + 1 : 0;
   DivergenceMeter_showCurrentWorldLine();
 }
 
-void DivergenceMeter_showPrevWorldLine() {
-  if (currentWorldLineIndex > 0) {
-    currentWorldLineIndex--;
-  } else {
-    currentWorldLineIndex = 31;
-  }
+static void DivergenceMeter_showPrevWorldLine() {
+  currentWorldLineIndex = currentWorldLineIndex > 0 ? currentWorldLineIndex - 1 : 31;
   DivergenceMeter_showCurrentWorldLine();
 }

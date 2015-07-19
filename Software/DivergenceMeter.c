@@ -50,17 +50,16 @@ static void DivergenceMeter_init();
 
 /* Volatile Variables (Modifiable by ISR)*/
 
-static volatile uint8_t clockCount = 0;
-static volatile uint16_t delayCount = 0;
-static volatile uint8_t currentMode = 0;
+static volatile uint8_t clockCount;
+static volatile uint16_t delayCount;
+static volatile uint8_t currentMode;
 
-volatile bool justEnteredMode[6] =
-    { false, false, false, false, false, false };
+volatile bool justEnteredMode[6];
 
-volatile uint16_t button_count[5] = { 0, 0, 0, 0, 0 };
-volatile bool buttonIsPressed[5] = { false, false, false, false, false };
-volatile bool buttonShortPressed[5] = { false, false, false, false, false };
-volatile bool buttonLongPressed[5] = { false, false, false, false, false };
+volatile uint16_t buttonCount[5];
+volatile bool buttonIsPressed[5];
+volatile bool buttonShortPressed[5];
+volatile bool buttonLongPressed[5];
 
 /* Normal Variables */
 
@@ -131,25 +130,25 @@ static void DivergenceMeter_init() {
 /* Timer0 Interrupt Code, ran every 10ms as configured*/
 
 ISR(TIMER0_COMPA_vect) {
-  for (int i = 4; i >= 0; i--) {
-    if (bit_is_set(PINA, i+3) && button_count[i] < 65535) {
-      button_count[i]++;
+  for (int8_t i = 4; i >= 0; i--) {
+    if (bit_is_set(PINA, i+3) && buttonCount[i] < 65535) {
+      buttonCount[i]++;
     } else {
-      button_count[i] = 0;
+      buttonCount[i] = 0;
       buttonIsPressed[i] = false;
       buttonShortPressed[i] = false;
       buttonLongPressed[i] = false;
     }
 
-    if (button_count[i] > (BUTTON_LONG_PRESS_MIN_DURATION_MS / 10)) {
+    if (buttonCount[i] > (BUTTON_LONG_PRESS_MIN_DURATION_MS / 10)) {
       buttonIsPressed[i] = true;
       buttonShortPressed[i] = false;
       buttonLongPressed[i] = true;
-    } else if (button_count[i] > (BUTTON_SHORT_PRESS_MAX_DURATION_MS / 10)) {
+    } else if (buttonCount[i] > (BUTTON_SHORT_PRESS_MAX_DURATION_MS / 10)) {
       buttonIsPressed[i] = true;
       buttonShortPressed[i] = false;
       buttonLongPressed[i] = false;
-    } else if (button_count[i] >= (BUTTON_SHORT_PRESS_MIN_DURATION_MS / 10)) {
+    } else if (buttonCount[i] >= (BUTTON_SHORT_PRESS_MIN_DURATION_MS / 10)) {
       buttonIsPressed[i] = true;
       buttonShortPressed[i] = true;
       buttonLongPressed[i] = false;
@@ -161,11 +160,7 @@ ISR(TIMER0_COMPA_vect) {
       case SETTINGS_MODE:
         settings_writeSettingsDS3232();
     }
-    if (currentMode < DIVERGENCE_MODE) {
-      currentMode++;
-    } else {
-      currentMode = CLOCK_MODE;
-    }
+    currentMode = currentMode < DIVERGENCE_MODE ? currentMode + 1 : CLOCK_MODE;
     justEnteredMode[currentMode] = true;
   } else if (buttonLongPressed[BUTTON1] && currentMode != SETTINGS_MODE) {
     DivergenceMeter_switchMode(SETTINGS_MODE, false);
@@ -173,8 +168,7 @@ ISR(TIMER0_COMPA_vect) {
   if (settings.main[BRIGHTNESS] == 10) {
     display_updateAdaptiveBrightness();
   }
-  clockCount++;
-  if (clockCount > 9 && currentMode != CLOCK_SET_MODE) {
+  if (++clockCount > 9 && currentMode != CLOCK_SET_MODE) {
     settings_readTimeDS3232();
     clockCount = 0;
   }
@@ -196,11 +190,8 @@ void DivergenceMeter_rollWorldLine(bool rollTube2) {
     if (DivergenceMeter_shouldNotRoll()) {
       return;
     }
-    if (i > 1) {
-      display_setTube(TUBE1, RNG_nextChar(),false,false);
-    } else {
-      display_setTube(TUBE1, (RNG_nextChar() == 9 ? BLANK : (RNG_nextChar() == 8 ? 1 : 0)),false,false);
-    }
+    uint8_t digit = i > 1 ? RNG_nextChar() : (RNG_nextChar() == 9 ? BLANK : (RNG_nextChar() == 8 ? 1 : 0));
+    display_setTube(TUBE1, digit,false,false);
     rollTube2 ? display_setTube(TUBE2,BLANK,true,false) : display_setTube(TUBE2,RNG_nextChar(),false,false);
     display_setTube(TUBE3, RNG_nextChar(),false,false);
     display_setTube(TUBE4, RNG_nextChar(),false,false);
@@ -209,7 +200,7 @@ void DivergenceMeter_rollWorldLine(bool rollTube2) {
     display_setTube(TUBE7, RNG_nextChar(),false,false);
     display_setTube(TUBE8, RNG_nextChar(),false,false);
     display_update();
-    for (int i = (ROLL_INTERVAL_MS / 10); i > 0; i--) {
+    for (uint8_t i = (ROLL_INTERVAL_MS / 10); i > 0; i--) {
       if (DivergenceMeter_shouldNotRoll()) {
         return;
       }
@@ -220,7 +211,7 @@ void DivergenceMeter_rollWorldLine(bool rollTube2) {
 
 void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2) {
   DivergenceMeter_rollWorldLine(rollTube2);
-  for (int i = (ROLL_DISPLAY_SECONDS * 100); i > 0; i--) {
+  for (uint16_t i = (ROLL_DISPLAY_SECONDS * 100); i > 0; i--) {
     if (DivergenceMeter_shouldNotRoll()) {
       return;
     }

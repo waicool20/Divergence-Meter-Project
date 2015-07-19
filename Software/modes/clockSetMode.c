@@ -96,37 +96,27 @@ void clockSetMode_run() {
   }
 
   display_setTube(TUBE2, (7 - currentTimeSetting), false, false);
+  uint8_t tube7;
+  uint8_t tube8;
   switch (currentTimeSetting) {
-    case YEAR:
-      display_setTube(TUBE7, (settings.time[YEAR] >> 4), false, false);
-      display_setTube(TUBE8, (settings.time[YEAR] & 0x0F), false, false);
-      break;
     case MONTH:
-      display_setTube(TUBE7, ((settings.time[MONTH] >> 4) & 0x01), false,
-      false);
-      display_setTube(TUBE8, (settings.time[MONTH] & 0x0F), false, false);
-      break;
-    case DATE:
-      display_setTube(TUBE7, (settings.time[DATE] >> 4), false, false);
-      display_setTube(TUBE8, (settings.time[DATE] & 0x0F), false, false);
+      tube7 = ((settings.time[MONTH] >> 4) & 0x01);
+      tube8 = (settings.time[MONTH] & 0x0F);
       break;
     case DAY_OF_WEEK:
-      display_setTube(TUBE7, 0, false, false);
-      display_setTube(TUBE8, (settings.time[DAY_OF_WEEK]), false, false);
+      tube7 = 0;
+      tube8 = (settings.time[DAY_OF_WEEK]);
       break;
     case HOURS:
-      display_setTube(TUBE7, ((settings.time[HOURS] >> 4) & 0x03), false,
-      false);
-      display_setTube(TUBE8, (settings.time[HOURS] & 0x0F), false, false);
+      tube7 = ((settings.time[HOURS] >> 4) & 0x03);
+      tube8 = (settings.time[HOURS] & 0x0F);
       break;
-    case MINUTES:
-      display_setTube(TUBE7, (settings.time[MINUTES] >> 4), false, false);
-      display_setTube(TUBE8, (settings.time[MINUTES] & 0x0F), false, false);
-      break;
-    case SECONDS:
-      display_setTube(TUBE7, (settings.time[SECONDS] >> 4), false, false);
-      display_setTube(TUBE8, (settings.time[SECONDS] & 0x0F), false, false);
+    default:
+      tube7 = (settings.time[currentTimeSetting] >> 4);
+      tube8 = (settings.time[currentTimeSetting] & 0x0F);
       break;
   }
+  display_setTube(TUBE7, tube7, false, false);
+  display_setTube(TUBE8, tube8, false, false);
   display_update();
 }

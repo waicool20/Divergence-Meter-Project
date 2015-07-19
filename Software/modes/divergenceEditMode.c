@@ -27,7 +27,7 @@
 
 /* Variables */
 
-uint8_t currentTube = 0;
+uint8_t currentTube;
 
 /* Divergence Edit Mode */
 
@@ -58,9 +58,7 @@ void divergenceEditMode_run() {
     }
     display_update();
     DivergenceMeter_delayCS(s2cs(0.2));
-  }
-
-  if (buttonShortPressed[BUTTON4]) {
+  } else if (buttonShortPressed[BUTTON4]) {
     if (currentTube < TUBE8) {
       if (currentTube == TUBE1) {
         display_setTube(TUBE2, BLANK, true, false);

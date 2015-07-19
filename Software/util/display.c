@@ -38,7 +38,7 @@ const uint16_t PROGMEM brightnessLevels[10] = { 25, 50, 75, 100, 125, 150, 175,
 Display display;
 Display lastDisplayState;
 
-void tmr1_init() {
+static void tmr1_init() {
   TCCR1A |= (1 << COM1A1) | (1 << PWM1A);
   TCCR1B |= (1 << CS13) | (1 << CS10);  // x512 prescaler
   TCCR1D &= ~(1 << WGM11) | ~(1 << WGM10);
@@ -56,7 +56,7 @@ void display_init() {
   display_update();
 }
 
-void handleGenericTube(uint8_t tube) {
+static void handleGenericTube(uint8_t tube) {
   switch (display.tube[tube]) {
     case 0:
       SRSendZeros(10);
@@ -78,7 +78,7 @@ void handleGenericTube(uint8_t tube) {
   }
 }
 
-void handleShiftRegister1() {
+static void handleShiftRegister1() {
   switch (display.tube[TUBE6]) {
     case 1:
     case 2:
@@ -104,7 +104,7 @@ void handleShiftRegister1() {
   handleGenericTube(TUBE8);
 }
 
-void handleShiftRegister2() {
+static void handleShiftRegister2() {
   switch (display.tube[TUBE3]) {
     case 8:
     case 9:
@@ -143,7 +143,7 @@ void handleShiftRegister2() {
   }
 }
 
-void handleShiftRegister3() {
+static void handleShiftRegister3() {
   handleGenericTube(TUBE1);
   handleGenericTube(TUBE2);
 
@@ -227,11 +227,7 @@ void display_decreaseBrightness() {
 }
 
 void display_toggleBrightness() {
-  if (settings.main[BRIGHTNESS] < 10) {
-    settings.main[BRIGHTNESS]++;
-  } else {
-    settings.main[BRIGHTNESS] = 0;
-  }
+  settings.main[BRIGHTNESS] = settings.main[BRIGHTNESS] < 10 ? settings.main[BRIGHTNESS] + 1 : 0;
   OCR1A = pgm_read_word(&(brightnessLevels[settings.main[BRIGHTNESS]]));
   settings_writeSettingsDS3232();
 }

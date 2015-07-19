@@ -29,10 +29,10 @@
 
 /* Prototypes */
 
-void clockMode_displayCurrentTime();
-void clockMode_displayDates();
-void clockMode_displayCurrentDate();
-void clockMode_displayCurrentDayOfWeek();
+static void clockMode_displayCurrentTime();
+static void clockMode_displayDates();
+static void clockMode_displayCurrentDate();
+static void clockMode_displayCurrentDayOfWeek();
 
 /* Clock Mode Code */
 
@@ -66,7 +66,7 @@ void clockMode_run() {
   clockMode_displayCurrentTime();
 }
 
-void clockMode_displayCurrentTime() {
+static void clockMode_displayCurrentTime() {
   if(settings.main[TIME_FORMAT_12H]){
     uint8_t hour = settings.time[HOURS];
     if(hour >= 0x13){
@@ -93,14 +93,14 @@ void clockMode_displayCurrentTime() {
   display_update();
 }
 
-void clockMode_displayDates(){
+static void clockMode_displayDates(){
   clockMode_displayCurrentDate();
   DivergenceMeter_delayCS(s2cs(DATE_DISPLAY_S));
   clockMode_displayCurrentDayOfWeek();
   DivergenceMeter_delayCS(s2cs(DAY_DISPLAY_S));
 }
 
-void clockMode_displayCurrentDate() {
+static void clockMode_displayCurrentDate() {
   display_setTube(TUBE1, ((settings.time[settings.main[DATE_FORMAT_DD_MM] ? DATE : MONTH] >> 4) & 0x03), false, false);
   display_setTube(TUBE2, (settings.time[settings.main[DATE_FORMAT_DD_MM] ? DATE : MONTH] & 0x0F), false, false);
   display_setTube(TUBE3, BLANK, false, true);
@@ -112,7 +112,7 @@ void clockMode_displayCurrentDate() {
   display_update();
 }
 
-void clockMode_displayCurrentDayOfWeek(){
+static void clockMode_displayCurrentDayOfWeek(){
   display_setTube(TUBE1, BLANK, false, false);
   display_setTube(TUBE2, BLANK, false, false);
   display_setTube(TUBE3, BLANK, false, false);

@@ -29,7 +29,7 @@
 #include "i2cmaster.h"
 #include "util/display.h"
 
-const uint8_t PROGMEM default_settings[3] = {
+static const uint8_t PROGMEM default_settings[3] = {
     10,  // DEFAULT_BRIGHTNESS
     0,  // TIME_FORMAT_12H
     0,  // DATE_FORMAT_DD_MM
@@ -46,10 +46,6 @@ void settings_init() {
         &(default_settings[TIME_FORMAT_12H]));
     settings.main[DATE_FORMAT_DD_MM] = pgm_read_byte(
         &(default_settings[DATE_FORMAT_DD_MM]));
-    settings.main[REST_ON_HOUR] = 0;
-    settings.main[REST_ON_MINUTE] = 0;
-    settings.main[WAKE_ON_HOUR] = 0;
-    settings.main[WAKE_ON_MINUTE] = 0;
     settings.not_first_boot = 1;
     settings_writeSettingsDS3232();
   }

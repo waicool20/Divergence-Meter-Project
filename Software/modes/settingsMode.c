@@ -28,21 +28,19 @@
 
 /* Prototypes */
 
-void DivergenceMeter_updateSettingsDisplay();
-
 /* Variables */
-uint8_t currentSetting = 0;
+static uint8_t currentSetting;
 
 /* Settings Mode Code */
 
 void settingsMode_run() {
   if (justEnteredMode[SETTINGS_MODE]) {
     currentSetting = TIME_FORMAT_12H;
-    display_setTube(TUBE1, (0), false, false);
-    display_setTube(TUBE3, (BLANK), false, false);
-    display_setTube(TUBE4, (BLANK), false, false);
-    display_setTube(TUBE5, (BLANK), false, false);
-    display_setTube(TUBE6, (BLANK), false, false);
+    display_setTube(TUBE1, 0, false, false);
+    display_setTube(TUBE3, BLANK, false, false);
+    display_setTube(TUBE4, BLANK, false, false);
+    display_setTube(TUBE5, BLANK, false, false);
+    display_setTube(TUBE6, BLANK, false, false);
     justEnteredMode[SETTINGS_MODE] = false;
   }
 
