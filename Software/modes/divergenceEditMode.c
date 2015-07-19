@@ -33,7 +33,7 @@ uint8_t currentTube = 0;
 
 void divergenceEditMode_run() {
   if (justEnteredMode[DIVERGENCE_EDIT_MODE]) {
-    currentTube = 0;
+    currentTube = TUBE1;
     display_setTube(TUBE1, 0, false, false);
     display_setTube(TUBE2, BLANK, false, false);
     display_setTube(TUBE3, BLANK, false, false);
@@ -47,25 +47,21 @@ void divergenceEditMode_run() {
   }
 
   if (buttonIsPressed[BUTTON2]) {
-    if (display.tube[currentTube] == BLANK) {
-      display.tube[currentTube] = 9;
-    } else if (display.tube[currentTube] > 0) {
+    if (display.tube[currentTube] > 0) {
       display.tube[currentTube]--;
     }
     display_update();
     DivergenceMeter_delayCS(s2cs(0.2));
   } else if (buttonIsPressed[BUTTON3]) {
-    if (display.tube[currentTube] < 9) {
+    if (display.tube[currentTube] < BLANK) {
       display.tube[currentTube]++;
-    } else if (display.tube[currentTube] == 9) {
-      display.tube[currentTube] = BLANK;
     }
     display_update();
     DivergenceMeter_delayCS(s2cs(0.2));
   }
 
   if (buttonShortPressed[BUTTON4]) {
-    if (currentTube < 7) {
+    if (currentTube < TUBE8) {
       if (currentTube == TUBE1) {
         display_setTube(TUBE2, BLANK, true, false);
         currentTube = TUBE3;  //SKIP TUBE2
@@ -75,7 +71,7 @@ void divergenceEditMode_run() {
       display.tube[currentTube] = 0;
       display_update();
     } else {
-      currentTube = 0;
+      currentTube = TUBE1;
       DivergenceMeter_switchMode(DIVERGENCE_MODE, true);
       display_saveState();
       DivergenceMeter_rollWorldLine(false);
@@ -84,7 +80,7 @@ void divergenceEditMode_run() {
     }
     DivergenceMeter_delayCS(s2cs(0.2));
   } else if (buttonShortPressed[BUTTON5]) {
-    if (currentTube > 0) {
+    if (currentTube > TUBE1) {
       display.tube[currentTube] = BLANK;
       if (currentTube == TUBE3) {
         display_setTube(TUBE2, BLANK, false, false);
