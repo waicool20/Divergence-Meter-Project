@@ -8,6 +8,7 @@ For changes to the hardware of the project please jump to the # Hardware section
 ### [UNRELEASED] - [UNRELEASED]
 #### Adding
 - Alarms
+- Resting hours
 
 
 ### [0.0.1a] - 2015-07-19

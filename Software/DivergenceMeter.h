@@ -23,7 +23,7 @@
 
 extern bool shouldRoll;
 
-extern volatile bool justEnteredMode[6];
+extern volatile bool justEnteredMode[7];
 
 extern volatile uint16_t buttonCount[5];
 extern volatile bool buttonIsPressed[5];

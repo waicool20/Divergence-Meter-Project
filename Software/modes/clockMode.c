@@ -42,6 +42,16 @@ void clockMode_run() {
   }
   switch (settings.time[SECONDS]) {
     case 0x00:
+      if(!((settings.main[REST_ON_MINUTE] == settings.main[WAKE_ON_MINUTE])
+          && (settings.main[REST_ON_HOUR] == settings.main[WAKE_ON_HOUR]))){
+        if(settings.time[MINUTES] == settings.main[REST_ON_MINUTE]
+          && settings.time[HOURS] == settings.main[REST_ON_HOUR]
+          && settings.time[SECONDS] == 0x00){
+          DivergenceMeter_switchMode(REST_MODE, false);
+          return;
+        }
+      }
+
       shouldRoll = true;
       DivergenceMeter_rollWorldLine(false);
       shouldRoll = false;

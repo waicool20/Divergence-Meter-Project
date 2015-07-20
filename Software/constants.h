@@ -74,5 +74,6 @@
 #define DIVERGENCE_EDIT_MODE 3
 #define ALARM_SET_MODE 4
 #define CLOCK_SET_MODE 5
+#define REST_MODE 6
 
 #endif /* CONSTANTS_H_ */

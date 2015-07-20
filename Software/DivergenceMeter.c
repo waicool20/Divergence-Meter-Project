@@ -38,6 +38,7 @@
 #include "modes/divergenceEditMode.h"
 #include "modes/divergenceMode.h"
 #include "modes/settingsMode.h"
+#include "modes/restMode.h"
 #include "settings.h"
 #include "util/display.h"
 #include "util/RNG.h"
@@ -54,7 +55,7 @@ static volatile uint8_t clockCount;
 static volatile uint16_t delayCount;
 static volatile uint8_t currentMode;
 
-volatile bool justEnteredMode[6];
+volatile bool justEnteredMode[7];
 
 volatile uint16_t buttonCount[5];
 volatile bool buttonIsPressed[5];
@@ -85,6 +86,9 @@ int main() {
         break;
       case CLOCK_SET_MODE:
         clockSetMode_run();
+        break;
+      case REST_MODE:
+        restMode_run();
         break;
     }
     DivergenceMeter_sleep();
@@ -159,6 +163,7 @@ ISR(TIMER0_COMPA_vect) {
     switch (currentMode){
       case SETTINGS_MODE:
         settings_writeSettingsDS3232();
+        break;
     }
     currentMode = currentMode < DIVERGENCE_MODE ? currentMode + 1 : CLOCK_MODE;
     justEnteredMode[currentMode] = true;
