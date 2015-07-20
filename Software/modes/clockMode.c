@@ -114,7 +114,7 @@ static void clockMode_displayCurrentDate() {
   display_setTube(TUBE1, ((settings.time[settings.main[DATE_FORMAT_DD_MM] ? DATE : MONTH] >> 4) & 0x03), false, false);
   display_setTube(TUBE2, (settings.time[settings.main[DATE_FORMAT_DD_MM] ? DATE : MONTH] & 0x0F), false, false);
   display_setTube(TUBE3, BLANK, false, true);
-  display_setTube(TUBE4, ((settings.time[settings.main[DATE_FORMAT_DD_MM] ? MONTH : DATE] >> 4) & 0x01), false, false);
+  display_setTube(TUBE4, ((settings.time[settings.main[DATE_FORMAT_DD_MM] ? MONTH : DATE] >> 4) & 0x03), false, false);
   display_setTube(TUBE5, (settings.time[settings.main[DATE_FORMAT_DD_MM] ? MONTH : DATE] & 0x0F), false, false);
   display_setTube(TUBE3, BLANK, true, false);
   display_setTube(TUBE7, (settings.time[YEAR] >> 4), false, false);
