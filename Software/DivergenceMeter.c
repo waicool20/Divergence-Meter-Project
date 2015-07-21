@@ -163,6 +163,9 @@ ISR(TIMER0_COMPA_vect) {
       case SETTINGS_MODE:
         settings_writeSettingsDS3232();
         break;
+      case REST_MODE:
+        display_on();
+        break;
     }
     currentMode = currentMode < DIVERGENCE_MODE ? currentMode + 1 : CLOCK_MODE;
     justEnteredMode[currentMode] = true;
