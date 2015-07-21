@@ -18,6 +18,7 @@
 
 #include "clockMode.h"
 
+#include <avr/io.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -63,8 +64,9 @@ void clockMode_run() {
   } else if (buttonLongPressed[BUTTON2]){
     DivergenceMeter_switchMode(CLOCK_SET_MODE, false);
   } else if (buttonShortPressed[BUTTON3]) {
-
-
+    PORTB |= (1<<SPEAKER);
+    DivergenceMeter_delayCS(2);
+    PORTB &= ~(1<<SPEAKER);
   } else if (buttonIsPressed[BUTTON4]) {
     shouldRoll = true;
     DivergenceMeter_rollWorldLineWithDelay(true);

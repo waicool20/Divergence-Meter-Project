@@ -43,7 +43,7 @@
 #include "util/display.h"
 #include "util/RNG.h"
 
-FUSES = { .low = 0x82, .high = 0xDF, .extended = 0x01, };
+FUSES = { .low = 0xE2, .high = 0xDF, .extended = 0x01, };
 
 /* Prototypes */
 
@@ -120,7 +120,6 @@ static void DivergenceMeter_init() {
       | (1 << BUTTON3_PIN) | (1 << BUTTON4_PIN) | (1 << BUTTON5_PIN));
   DDRB = (1 << LE) | (1 << BL) | (1 << CLK) | (1 << DIN) | (1 << SPEAKER);
   MCUCR = (1 << PUD);
-
   //Global interrupt enable
   sei();
 
@@ -129,6 +128,7 @@ static void DivergenceMeter_init() {
   RNG_init();
   tmr0_init();
   display_init();
+
 }
 
 /* Timer0 Interrupt Code, ran every 10ms as configured*/
@@ -158,7 +158,6 @@ ISR(TIMER0_COMPA_vect) {
       buttonLongPressed[i] = false;
     }
   }
-
   if (buttonShortPressed[BUTTON1]) {
     switch (currentMode){
       case SETTINGS_MODE:
