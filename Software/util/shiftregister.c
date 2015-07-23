@@ -58,3 +58,16 @@ void SRSendZeros(uint8_t i) {
   PORTB &= ~(1 << DIN);
   SRShift(i);
 }
+
+void SRSendOne() {
+  PORTB |= (1 << DIN);
+  PORTB |= (1 << CLK);
+  PORTB &= ~(1 << CLK);
+  PORTB &= ~(1 << DIN);
+}
+
+void SRSendZero() {
+  PORTB &= ~(1 << DIN);
+  PORTB |= (1 << CLK);
+  PORTB &= ~(1 << CLK);
+}

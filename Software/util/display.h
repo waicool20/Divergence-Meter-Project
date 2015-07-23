@@ -19,9 +19,12 @@
 #define DISPLAY_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct {
   uint8_t tube[8];
+  bool showRDP[8];
+  bool showLDP[8];
 } Display;
 
 extern Display display;
@@ -34,6 +37,8 @@ void display_update();
 void display_on();
 
 void display_off();
+
+void display_setTube(uint8_t tube, uint8_t digit, bool showRDP, bool showLDP);
 
 void display_updateAdaptiveBrightness();
 

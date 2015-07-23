@@ -52,9 +52,9 @@
 #define BUTTON_SHORT_PRESS_MAX_DURATION_MS 60
 #define BUTTON_LONG_PRESS_MIN_DURATION_MS 1200
 
-
 #define DATE_DISPLAY_S 1
 #define DAY_DISPLAY_S 1
+#define ALARM_ARM_DISPLAY_S 0.4
 #define BRIGHTNESS_DISPLAY_S 0.25
 
 #define LE PB0
@@ -64,10 +64,14 @@
 #define SPEAKER PB5
 #define HV_DISABLE PB6
 
-#define RDP 10
-#define LDP 11
-#define BLANK 12
+#define BLANK 10
 #define DS3232 0xD0
+
+#define ALARM1 1
+#define ALARM2 2
+#define ALARM_RING_M 10
+#define MAX_BEEPS 10
+#define BEEP_INC_INTERVAL_S 20
 
 #define CLOCK_MODE 0
 #define DIVERGENCE_MODE 1
@@ -76,5 +80,6 @@
 #define DIVERGENCE_EDIT_MODE 3
 #define ALARM_SET_MODE 4
 #define CLOCK_SET_MODE 5
+#define REST_MODE 6
 
 #endif /* CONSTANTS_H_ */

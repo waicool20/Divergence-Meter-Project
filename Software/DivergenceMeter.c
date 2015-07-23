@@ -35,14 +35,16 @@
 #include "constants.h"
 #include "modes/clockMode.h"
 #include "modes/clockSetMode.h"
+#include "modes/alarmSetMode.h"
 #include "modes/divergenceEditMode.h"
 #include "modes/divergenceMode.h"
 #include "modes/settingsMode.h"
+#include "modes/restMode.h"
 #include "settings.h"
 #include "util/display.h"
 #include "util/RNG.h"
 
-FUSES = { .low = 0x82, .high = 0xDF, .extended = 0x01, };
+FUSES = { .low = 0xE2, .high = 0xDF, .extended = 0x01, };
 
 /* Prototypes */
 
@@ -50,30 +52,63 @@ static void DivergenceMeter_init();
 
 /* Volatile Variables (Modifiable by ISR)*/
 
-static volatile uint8_t clockCount = 0;
-static volatile uint16_t delayCount = 0;
-static volatile uint8_t currentMode = 0;
+static volatile uint8_t clockCount;
+static volatile uint16_t delayCount;
+static volatile uint8_t currentMode;
+static volatile uint8_t oldSecond;
 
-volatile bool justEnteredMode[6] =
-    { false, false, false, false, false, false };
+static volatile uint8_t buzzDuration;
+static volatile uint8_t buzzedDuration;
+static volatile uint8_t buzzInterval;
+static volatile uint8_t buzzIntervalCount;
+static volatile uint8_t buzzTimes;
 
-volatile uint16_t button_count[5] = { 0, 0, 0, 0, 0 };
-volatile bool buttonIsPressed[5] = { false, false, false, false, false };
-volatile bool buttonShortPressed[5] = { false, false, false, false, false };
-volatile bool buttonLongPressed[5] = { false, false, false, false, false };
+volatile bool justEnteredMode[7];
+
+volatile uint16_t buttonCount[5];
+volatile bool buttonIsPressed[5];
+volatile bool buttonShortPressed[5];
+volatile bool buttonLongPressed[5];
+
+volatile uint16_t ringDuration;
+volatile uint16_t beepIncCount;
+volatile uint8_t beeps;
 
 /* Normal Variables */
 
 bool shouldRoll = false;
 
 /* Main Code Start */
-
 int main() {
   DivergenceMeter_init();
   while (1) {
+    if (oldSecond != settings.time[SECONDS]) {
+      oldSecond = settings.time[SECONDS];
+      if(ringDuration > 0){
+        ringDuration--;
+      }
+      beepIncCount++;
+      if(ringDuration){
+        if(!(settings.time[SECONDS] & 0x01)){
+          DivergenceMeter_buzz(2,8,beeps);
+        }
+      }
+    }
+    if(beepIncCount > BEEP_INC_INTERVAL_S){
+      beepIncCount = 0;
+      if(beeps < MAX_BEEPS){
+        beeps++;
+      }
+    }
+    if (settings.main[BRIGHTNESS] == 10) {
+      display_updateAdaptiveBrightness();
+    }
     switch (currentMode) {
       case CLOCK_MODE:
         clockMode_run();
+        break;
+      case ALARM_SET_MODE:
+        alarmSetMode_run();
         break;
       case DIVERGENCE_MODE:
         divergenceMode_run();
@@ -86,6 +121,9 @@ int main() {
         break;
       case CLOCK_SET_MODE:
         clockSetMode_run();
+        break;
+      case REST_MODE:
+        restMode_run();
         break;
     }
     DivergenceMeter_sleep();
@@ -117,11 +155,11 @@ static void DivergenceMeter_init() {
       | (1 << BUTTON3_PIN) | (1 << BUTTON4_PIN) | (1 << BUTTON5_PIN));
   DDRB = (1 << LE) | (1 << BL) | (1 << CLK) | (1 << DIN) | (1 << SPEAKER);
   MCUCR = (1 << PUD);
-
   //Global interrupt enable
   sei();
 
   settings_init();
+  settings_clearAlarmFlagsDS3232();
   ADC_init();
   RNG_init();
   tmr0_init();
@@ -131,55 +169,72 @@ static void DivergenceMeter_init() {
 /* Timer0 Interrupt Code, ran every 10ms as configured*/
 
 ISR(TIMER0_COMPA_vect) {
-  for (int i = 4; i >= 0; i--) {
-    if (bit_is_set(PINA, i+3) && button_count[i] < 65535) {
-      button_count[i]++;
+  for (int8_t i = 4; i >= 0; i--) {
+    if (bit_is_set(PINA, i+3) && buttonCount[i] < 65535) {
+      buttonCount[i]++;
     } else {
-      button_count[i] = 0;
+      buttonCount[i] = 0;
       buttonIsPressed[i] = false;
       buttonShortPressed[i] = false;
       buttonLongPressed[i] = false;
     }
 
-    if (button_count[i] > (BUTTON_LONG_PRESS_MIN_DURATION_MS / 10)) {
+    if (buttonCount[i] > (BUTTON_LONG_PRESS_MIN_DURATION_MS / 10)) {
       buttonIsPressed[i] = true;
       buttonShortPressed[i] = false;
       buttonLongPressed[i] = true;
-    } else if (button_count[i] > (BUTTON_SHORT_PRESS_MAX_DURATION_MS / 10)) {
+    } else if (buttonCount[i] > (BUTTON_SHORT_PRESS_MAX_DURATION_MS / 10)) {
       buttonIsPressed[i] = true;
       buttonShortPressed[i] = false;
       buttonLongPressed[i] = false;
-    } else if (button_count[i] >= (BUTTON_SHORT_PRESS_MIN_DURATION_MS / 10)) {
+    } else if (buttonCount[i] >= (BUTTON_SHORT_PRESS_MIN_DURATION_MS / 10)) {
+      if(settings.main[BEEP_ON_PRESS]){
+        DivergenceMeter_buzz(2,2,1);
+      }
       buttonIsPressed[i] = true;
       buttonShortPressed[i] = true;
       buttonLongPressed[i] = false;
     }
   }
-
   if (buttonShortPressed[BUTTON1]) {
     switch (currentMode){
       case SETTINGS_MODE:
         settings_writeSettingsDS3232();
+        break;
+      case REST_MODE:
+        display_on();
+        break;
     }
-    if (currentMode < DIVERGENCE_MODE) {
-      currentMode++;
-    } else {
-      currentMode = CLOCK_MODE;
-    }
+    currentMode = currentMode < DIVERGENCE_MODE ? currentMode + 1 : CLOCK_MODE;
     justEnteredMode[currentMode] = true;
   } else if (buttonLongPressed[BUTTON1] && currentMode != SETTINGS_MODE) {
-    DivergenceMeter_switchMode(SETTINGS_MODE);
+    DivergenceMeter_switchMode(SETTINGS_MODE, false);
   }
-  if (settings.main[BRIGHTNESS] == 10) {
-    display_updateAdaptiveBrightness();
-  }
-  clockCount++;
-  if (clockCount > 9 && currentMode != CLOCK_SET_MODE) {
+  if(++clockCount > 9 && currentMode != CLOCK_SET_MODE){
     settings_readTimeDS3232();
     clockCount = 0;
   }
   if(delayCount > 0){
     delayCount--;
+  }
+  if(buzzTimes){
+    if(buzzIntervalCount++ == buzzInterval){
+      buzzIntervalCount =0;
+      PORTB |= (1<<SPEAKER);
+      if(buzzedDuration++ == buzzDuration){
+        buzzedDuration = 0;
+        PORTB &= ~(1<<SPEAKER);
+        buzzTimes--;
+      }
+    }
+  }
+  if(bit_is_clear(PINA, ALARM_INT)){
+    ringDuration = (ALARM_RING_M * 60);
+    beeps = 1;
+    beepIncCount = 0;
+    DivergenceMeter_switchMode(CLOCK_MODE, false);
+    display_on();
+    settings_clearAlarmFlagsDS3232();
   }
   TCNT0H = 0x00;
   TCNT0L = 0x00;
@@ -196,21 +251,17 @@ void DivergenceMeter_rollWorldLine(bool rollTube2) {
     if (DivergenceMeter_shouldNotRoll()) {
       return;
     }
-    if (i > 1) {
-      display.tube[TUBE1] = RNG_nextChar();
-    } else {
-      display.tube[TUBE1] =
-          RNG_nextChar() == 9 ? BLANK : (RNG_nextChar() == 8 ? 1 : 0);
-    }
-    display.tube[TUBE2] = rollTube2 ? RDP : RNG_nextChar();
-    display.tube[TUBE3] = RNG_nextChar();
-    display.tube[TUBE4] = RNG_nextChar();
-    display.tube[TUBE5] = RNG_nextChar();
-    display.tube[TUBE6] = RNG_nextChar();
-    display.tube[TUBE7] = RNG_nextChar();
-    display.tube[TUBE8] = RNG_nextChar();
+    uint8_t digit = i > 1 ? RNG_nextChar() : (RNG_nextChar() == 9 ? BLANK : (RNG_nextChar() == 8 ? 1 : 0));
+    display_setTube(TUBE1, digit,false,false);
+    rollTube2 ? display_setTube(TUBE2,BLANK,true,false) : display_setTube(TUBE2,RNG_nextChar(),false,false);
+    display_setTube(TUBE3, RNG_nextChar(),false,false);
+    display_setTube(TUBE4, RNG_nextChar(),false,false);
+    display_setTube(TUBE5, RNG_nextChar(),false,false);
+    display_setTube(TUBE6, RNG_nextChar(),false,false);
+    display_setTube(TUBE7, RNG_nextChar(),false,false);
+    display_setTube(TUBE8, RNG_nextChar(),false,false);
     display_update();
-    for (int i = (ROLL_INTERVAL_MS / 10); i > 0; i--) {
+    for (uint8_t i = (ROLL_INTERVAL_MS / 10); i > 0; i--) {
       if (DivergenceMeter_shouldNotRoll()) {
         return;
       }
@@ -221,7 +272,7 @@ void DivergenceMeter_rollWorldLine(bool rollTube2) {
 
 void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2) {
   DivergenceMeter_rollWorldLine(rollTube2);
-  for (int i = (ROLL_DISPLAY_SECONDS * 100); i > 0; i--) {
+  for (uint16_t i = (ROLL_DISPLAY_SECONDS * 100); i > 0; i--) {
     if (DivergenceMeter_shouldNotRoll()) {
       return;
     }
@@ -252,7 +303,13 @@ void DivergenceMeter_sleep(){
   power_adc_enable();
 }
 
-void DivergenceMeter_switchMode(uint8_t mode){
+void DivergenceMeter_switchMode(uint8_t mode, bool silent){
   currentMode = mode;
-  justEnteredMode[mode] = true;
+  justEnteredMode[mode] = !silent;
+}
+
+void DivergenceMeter_buzz(uint8_t duration_cs, uint8_t interval, uint8_t times){
+  buzzDuration = duration_cs;
+  buzzInterval = interval;
+  buzzTimes = times;
 }

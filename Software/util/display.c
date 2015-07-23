@@ -38,7 +38,7 @@ const uint16_t PROGMEM brightnessLevels[10] = { 25, 50, 75, 100, 125, 150, 175,
 Display display;
 Display lastDisplayState;
 
-void tmr1_init() {
+static void tmr1_init() {
   TCCR1A |= (1 << COM1A1) | (1 << PWM1A);
   TCCR1B |= (1 << CS13) | (1 << CS10);  // x512 prescaler
   TCCR1D &= ~(1 << WGM11) | ~(1 << WGM10);
@@ -56,55 +56,47 @@ void display_init() {
   display_update();
 }
 
-void handleGenericTube(uint8_t tube) {
+static void handleGenericTube(uint8_t tube) {
   switch (display.tube[tube]) {
     case 0:
       SRSendZeros(10);
-      SRSendOnes(1);
-      SRSendZeros(1);
-      break;
-    case RDP:
-      SRSendZeros(11);
-      SRSendOnes(1);
-      break;
-    case LDP:
-      SRSendOnes(1);
-      SRSendZeros(11);
+      SRSendOne();
+      display.showRDP[tube] ? SRSendOne() : SRSendZero();
       break;
     case BLANK:
-      SRSendZeros(12);
+      display.showLDP[tube] ? SRSendOne() : SRSendZero();
+      SRSendZeros(10);
+      display.showRDP[tube] ? SRSendOne() : SRSendZero();
       break;
     default:
-      SRSendZeros(display.tube[tube]);
-      SRSendOnes(1);
-      SRSendZeros(11 - display.tube[tube]);
+      display.showLDP[tube] ? SRSendOne() : SRSendZero();
+      SRSendZeros(display.tube[tube] - 1);
+      SRSendOne();
+      SRSendZeros(10 - display.tube[tube]);
+      display.showRDP[tube] ? SRSendOne() : SRSendZero();
       break;
   }
 }
 
-void handleShiftRegister1() {
+static void handleShiftRegister1() {
   switch (display.tube[TUBE6]) {
     case 1:
     case 2:
     case 3:
-      SRSendZeros(8);
+    case BLANK:
+      SRSendZeros(7);
+      display.showRDP[TUBE6] ? SRSendOne() : SRSendZero();
       break;
     case 0:
       SRSendZeros(6);
-      SRSendOnes(1);
-      SRSendZeros(1);
-      break;
-    case RDP:
-      SRSendZeros(7);
-      SRSendOnes(1);
-      break;
-    case BLANK:
-      SRSendZeros(8);
+      SRSendOne();
+      display.showRDP[TUBE6] ? SRSendOne() : SRSendZero();
       break;
     default:
       SRSendZeros(display.tube[TUBE6] - 4);
-      SRSendOnes(1);
-      SRSendZeros(11 - display.tube[TUBE6]);
+      SRSendOne();
+      SRSendZeros(10 - display.tube[TUBE6]);
+      display.showRDP[TUBE6] ? SRSendOne() : SRSendZero();
       break;
   }
 
@@ -112,28 +104,23 @@ void handleShiftRegister1() {
   handleGenericTube(TUBE8);
 }
 
-void handleShiftRegister2() {
+static void handleShiftRegister2() {
   switch (display.tube[TUBE3]) {
     case 8:
     case 9:
       SRSendZeros(display.tube[TUBE3] - 8);
-      SRSendOnes(1);
-      SRSendZeros(11 - display.tube[TUBE3]);
+      SRSendOne();
+      SRSendZeros(10 - display.tube[TUBE3]);
+      display.showRDP[TUBE3] ? SRSendOne() : SRSendZero();
       break;
     case 0:
       SRSendZeros(2);
-      SRSendOnes(1);
-      SRSendZeros(1);
-      break;
-    case RDP:
-      SRSendZeros(3);
-      SRSendOnes(1);
-      break;
-    case BLANK:
-      SRSendZeros(4);
+      SRSendOne();
+      display.showRDP[TUBE3] ? SRSendOne() : SRSendZero();
       break;
     default:
-      SRSendZeros(4);
+      SRSendZeros(3);
+      display.showRDP[TUBE3] ? SRSendOne() : SRSendZero();
       break;
   }
 
@@ -144,24 +131,19 @@ void handleShiftRegister2() {
     case 1:
     case 2:
     case 3:
-      SRSendZeros(display.tube[TUBE6]);
-      SRSendOnes(1);
+      display.showLDP[TUBE6] ? SRSendOne() : SRSendZero();
+      SRSendZeros(display.tube[TUBE6]-1);
+      SRSendOne();
       SRSendZeros(3 - display.tube[TUBE6]);
       break;
-    case LDP:
-      SRSendOnes(1);
-      SRSendZeros(3);
-      break;
-    case BLANK:
-      SRSendZeros(4);
-      break;
     default:
-      SRSendZeros(4);
+      display.showLDP[TUBE6] ? SRSendOne() : SRSendZero();
+      SRSendZeros(3);
       break;
   }
 }
 
-void handleShiftRegister3() {
+static void handleShiftRegister3() {
   handleGenericTube(TUBE1);
   handleGenericTube(TUBE2);
 
@@ -169,19 +151,14 @@ void handleShiftRegister3() {
     case 8:
     case 9:
     case 0:
-    case RDP:
-      SRSendZeros(8);
-      break;
-    case LDP:
-      SRSendOnes(1);
+    case BLANK:
+      display.showLDP[TUBE6] ? SRSendOne() : SRSendZero();
       SRSendZeros(7);
       break;
-    case BLANK:
-      SRSendZeros(8);
-      break;
     default:
-      SRSendZeros(display.tube[TUBE3]);
-      SRSendOnes(1);
+      display.showLDP[TUBE6] ? SRSendOne() : SRSendZero();
+      SRSendZeros(display.tube[TUBE3]-1);
+      SRSendOne();
       SRSendZeros(7 - display.tube[TUBE3]);
       break;
   }
@@ -202,6 +179,12 @@ void display_on() {
 void display_off() {
   DDRB |= (1 << HV_DISABLE);
   PORTB |= (1 << HV_DISABLE);
+}
+
+void display_setTube(uint8_t tube, uint8_t digit, bool showRDP, bool showLDP){
+  display.tube[tube] = digit;
+  display.showRDP[tube] = showRDP;
+  display.showLDP[tube] = showLDP;
 }
 
 void display_showCurrentBrightness() {
@@ -244,11 +227,7 @@ void display_decreaseBrightness() {
 }
 
 void display_toggleBrightness() {
-  if (settings.main[BRIGHTNESS] < 10) {
-    settings.main[BRIGHTNESS]++;
-  } else {
-    settings.main[BRIGHTNESS] = 0;
-  }
+  settings.main[BRIGHTNESS] = settings.main[BRIGHTNESS] < 10 ? settings.main[BRIGHTNESS] + 1 : 0;
   OCR1A = pgm_read_word(&(brightnessLevels[settings.main[BRIGHTNESS]]));
   settings_writeSettingsDS3232();
 }
