@@ -34,6 +34,7 @@ static void clockMode_displayCurrentTime();
 static void clockMode_displayDates();
 static void clockMode_displayCurrentDate();
 static void clockMode_displayCurrentDayOfWeek();
+static void clockMode_displayArmedAlarms();
 
 /* Clock Mode Code */
 
@@ -65,7 +66,18 @@ void clockMode_run() {
   } else if (buttonLongPressed[BUTTON2]){
     DivergenceMeter_switchMode(CLOCK_SET_MODE, false);
   } else if (buttonShortPressed[BUTTON3]) {
-    //alarm arm and disarm
+    if(ringDuration){
+      ringDuration = 0;
+      DivergenceMeter_delayCS(s2cs(0.2));
+    } else {
+      uint8_t alarmArmState = settings.control & 0x03;
+      alarmArmState = alarmArmState < 3 ? alarmArmState + 1 : 0;
+      settings.control &= 0xFC;
+      settings.control |= alarmArmState;
+      settings_writeControlDS3232();
+      clockMode_displayArmedAlarms();
+      DivergenceMeter_delayCS(s2cs(ALARM_ARM_DISPLAY_S));
+    }
   }else if (buttonLongPressed[BUTTON3]) {
     DivergenceMeter_switchMode(ALARM_SET_MODE, false);
   } else if (buttonIsPressed[BUTTON4]) {
@@ -131,6 +143,18 @@ static void clockMode_displayCurrentDayOfWeek(){
   display_setTube(TUBE3, BLANK, false, false);
   display_setTube(TUBE4, 0, false, false);
   display_setTube(TUBE5, (settings.time[DAY_OF_WEEK]), false, false);
+  display_setTube(TUBE3, BLANK, false, false);
+  display_setTube(TUBE7, BLANK, false, false);
+  display_setTube(TUBE8, BLANK, false, false);
+  display_update();
+}
+
+static void clockMode_displayArmedAlarms(){
+  display_setTube(TUBE1, BLANK, false, false);
+  display_setTube(TUBE2, BLANK, false, false);
+  display_setTube(TUBE3, BLANK, false, false);
+  display_setTube(TUBE4, settings.control & 0x01, false, false);
+  display_setTube(TUBE5, (settings.control >> 1) & 0x01, false, false);
   display_setTube(TUBE3, BLANK, false, false);
   display_setTube(TUBE7, BLANK, false, false);
   display_setTube(TUBE8, BLANK, false, false);

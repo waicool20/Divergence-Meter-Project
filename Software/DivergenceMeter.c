@@ -191,7 +191,6 @@ ISR(TIMER0_COMPA_vect) {
       if(settings.main[BEEP_ON_PRESS]){
         DivergenceMeter_buzz(2,2,1);
       }
-      ringDuration = 0;
       buttonIsPressed[i] = true;
       buttonShortPressed[i] = true;
       buttonLongPressed[i] = false;
@@ -232,6 +231,7 @@ ISR(TIMER0_COMPA_vect) {
   if(bit_is_clear(PINA, ALARM_INT)){
     ringDuration = (ALARM_RING_M * 60);
     beeps = 1;
+    beepIncCount = 0;
     DivergenceMeter_switchMode(CLOCK_MODE, false);
     display_on();
     settings_clearAlarmFlagsDS3232();

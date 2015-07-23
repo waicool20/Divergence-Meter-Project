@@ -54,6 +54,7 @@
 
 #define DATE_DISPLAY_S 1
 #define DAY_DISPLAY_S 1
+#define ALARM_ARM_DISPLAY_S 0.4
 #define BRIGHTNESS_DISPLAY_S 0.25
 
 #define LE PB0
