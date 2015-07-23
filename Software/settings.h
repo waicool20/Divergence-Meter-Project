@@ -35,23 +35,34 @@
 
 #define ALARM2_MINUTES 4
 #define ALARM2_HOURS 5
-#define ALARM2_DAY 6
-#define ALARM2_DAY_DATE 7
+#define ALARM2_DAY_DATE 6
 
 #define BRIGHTNESS 0
 #define TIME_FORMAT_12H 1
 #define DATE_FORMAT_DD_MM 2
+#define BEEP_ON_PRESS 3
 
-#define REST_ON_HOUR 3
-#define REST_ON_MINUTE 4
-#define WAKE_ON_HOUR 5
-#define WAKE_ON_MINUTE 6
+#define REST_ON_HOUR 4
+#define REST_ON_MINUTE 5
+#define WAKE_ON_HOUR 6
+#define WAKE_ON_MINUTE 7
+
+#define A1IE 0
+#define A2IE 1
+#define INTCN 2
+#define RS1 3
+#define RS2 4
+#define CONV 5
+#define BBSQW 6
+#define EOSC 7
 
 typedef struct {
   uint8_t time[7];
-  uint8_t alarm[8];
-  uint8_t main[7];
+  uint8_t alarm[7];
+  uint8_t main[8];
   uint8_t not_first_boot;
+  uint8_t control;
+  uint8_t controlStatus;
 } Settings;
 
 extern Settings settings;
@@ -68,6 +79,10 @@ void settings_readAlarm2DS3232();
 
 void settings_readSettingsDS3232();
 
+void settings_readControlDS3232();
+
+void settings_readControlStatusDS3232();
+
 void settings_writeDS3232();
 
 void settings_writeTimeDS3232();
@@ -77,5 +92,11 @@ void settings_writeAlarm1DS3232();
 void settings_writeAlarm2DS3232();
 
 void settings_writeSettingsDS3232();
+
+void settings_writeControlDS3232();
+
+void settings_writeControlStatusDS3232();
+
+void settings_clearAlarmFlagsDS3232();
 
 #endif /* SETTINGS_H_ */

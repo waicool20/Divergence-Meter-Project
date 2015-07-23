@@ -23,6 +23,7 @@
 #include "settings.h"
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <avr/pgmspace.h>
 
 #include "constants.h"
@@ -37,6 +38,9 @@ void settings_init() {
   i2c_init();
   settings_readDS3232();
   if (!settings.not_first_boot) {
+    for(int8_t i = 7; i > 0; i--){
+      settings.main[i] = 0;
+    }
     settings.main[BRIGHTNESS] = pgm_read_byte(&(default_brightness));
     settings.not_first_boot = 1;
     settings_writeSettingsDS3232();
@@ -48,6 +52,7 @@ void settings_readDS3232() {
   settings_readAlarm1DS3232();
   settings_readAlarm2DS3232();
   settings_readSettingsDS3232();
+  settings_readControlDS3232();
 }
 
 void settings_readTimeDS3232() {
@@ -92,6 +97,7 @@ void settings_readSettingsDS3232() {
   settings.main[BRIGHTNESS] = i2c_readAck();
   settings.main[TIME_FORMAT_12H] = i2c_readAck();
   settings.main[DATE_FORMAT_DD_MM] = i2c_readAck();
+  settings.main[BEEP_ON_PRESS] = i2c_readAck();
 
   settings.main[REST_ON_HOUR] = i2c_readAck();
   settings.main[REST_ON_MINUTE] = i2c_readAck();
@@ -102,11 +108,28 @@ void settings_readSettingsDS3232() {
   i2c_stop();
 }
 
+void settings_readControlDS3232(){
+  i2c_start_wait(DS3232 + I2C_WRITE);
+  i2c_write(0x0E);
+  i2c_rep_start(DS3232 + I2C_READ);
+  settings.control = i2c_readAck();
+  i2c_stop();
+}
+
+void settings_readControlStatusDS3232(){
+  i2c_start_wait(DS3232 + I2C_WRITE);
+  i2c_write(0x0F);
+  i2c_rep_start(DS3232 + I2C_READ);
+  settings.controlStatus = i2c_readAck();
+  i2c_stop();
+}
+
 void settings_writeDS3232() {
   settings_writeTimeDS3232();
   settings_writeAlarm1DS3232();
   settings_writeAlarm2DS3232();
   settings_writeSettingsDS3232();
+  settings_writeControlDS3232();
 }
 
 void settings_writeTimeDS3232() {
@@ -151,6 +174,7 @@ void settings_writeSettingsDS3232() {
   i2c_write(settings.main[BRIGHTNESS]);
   i2c_write(settings.main[TIME_FORMAT_12H]);
   i2c_write(settings.main[DATE_FORMAT_DD_MM]);
+  i2c_write(settings.main[BEEP_ON_PRESS]);
 
   i2c_write(settings.main[REST_ON_HOUR]);
   i2c_write(settings.main[REST_ON_MINUTE]);
@@ -159,4 +183,23 @@ void settings_writeSettingsDS3232() {
 
   i2c_write(settings.not_first_boot);
   i2c_stop();
+}
+
+void settings_writeControlDS3232(){
+  i2c_start_wait(DS3232 + I2C_WRITE);
+  i2c_write(0x0E);
+  i2c_write(settings.control);
+  i2c_stop();
+}
+
+void settings_writeControlStatusDS3232(){
+  i2c_start_wait(DS3232 + I2C_WRITE);
+  i2c_write(0x0F);
+  i2c_write(settings.controlStatus);
+  i2c_stop();
+}
+
+void settings_clearAlarmFlagsDS3232(){
+  settings.controlStatus &= 0xFC;
+  settings_writeControlStatusDS3232();
 }

@@ -30,6 +30,8 @@ extern volatile bool buttonIsPressed[5];
 extern volatile bool buttonShortPressed[5];
 extern volatile bool buttonLongPressed[5];
 
+extern volatile uint16_t ringDuration;
+
 void DivergenceMeter_rollWorldLine(bool rollTube2);
 
 void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2);
@@ -41,5 +43,7 @@ void DivergenceMeter_delayCS(uint16_t delay_cs);
 void DivergenceMeter_sleep();
 
 void DivergenceMeter_switchMode(uint8_t mode, bool silent);
+
+void DivergenceMeter_buzz(uint8_t duration_cs, uint8_t interval, uint8_t times);
 
 #endif /* DIVERGENCEMETER_H_ */

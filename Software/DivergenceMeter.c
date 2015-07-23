@@ -35,6 +35,7 @@
 #include "constants.h"
 #include "modes/clockMode.h"
 #include "modes/clockSetMode.h"
+#include "modes/alarmSetMode.h"
 #include "modes/divergenceEditMode.h"
 #include "modes/divergenceMode.h"
 #include "modes/settingsMode.h"
@@ -54,6 +55,13 @@ static void DivergenceMeter_init();
 static volatile uint8_t clockCount;
 static volatile uint16_t delayCount;
 static volatile uint8_t currentMode;
+static volatile uint8_t oldSecond;
+
+static volatile uint8_t buzzDuration;
+static volatile uint8_t buzzedDuration;
+static volatile uint8_t buzzInterval;
+static volatile uint8_t buzzIntervalCount;
+static volatile uint8_t buzzTimes;
 
 volatile bool justEnteredMode[7];
 
@@ -62,18 +70,45 @@ volatile bool buttonIsPressed[5];
 volatile bool buttonShortPressed[5];
 volatile bool buttonLongPressed[5];
 
+volatile uint16_t ringDuration;
+volatile uint16_t beepIncCount;
+volatile uint8_t beeps;
+
 /* Normal Variables */
 
 bool shouldRoll = false;
 
 /* Main Code Start */
-
 int main() {
   DivergenceMeter_init();
   while (1) {
+    if (oldSecond != settings.time[SECONDS]) {
+      oldSecond = settings.time[SECONDS];
+      if(ringDuration > 0){
+        ringDuration--;
+      }
+      beepIncCount++;
+      if(ringDuration){
+        if(!(settings.time[SECONDS] & 0x01)){
+          DivergenceMeter_buzz(2,8,beeps);
+        }
+      }
+    }
+    if(beepIncCount > BEEP_INC_INTERVAL_S){
+      beepIncCount = 0;
+      if(beeps < MAX_BEEPS){
+        beeps++;
+      }
+    }
+    if (settings.main[BRIGHTNESS] == 10) {
+      display_updateAdaptiveBrightness();
+    }
     switch (currentMode) {
       case CLOCK_MODE:
         clockMode_run();
+        break;
+      case ALARM_SET_MODE:
+        alarmSetMode_run();
         break;
       case DIVERGENCE_MODE:
         divergenceMode_run();
@@ -124,11 +159,11 @@ static void DivergenceMeter_init() {
   sei();
 
   settings_init();
+  settings_clearAlarmFlagsDS3232();
   ADC_init();
   RNG_init();
   tmr0_init();
   display_init();
-
 }
 
 /* Timer0 Interrupt Code, ran every 10ms as configured*/
@@ -153,6 +188,10 @@ ISR(TIMER0_COMPA_vect) {
       buttonShortPressed[i] = false;
       buttonLongPressed[i] = false;
     } else if (buttonCount[i] >= (BUTTON_SHORT_PRESS_MIN_DURATION_MS / 10)) {
+      if(settings.main[BEEP_ON_PRESS]){
+        DivergenceMeter_buzz(2,2,1);
+      }
+      ringDuration = 0;
       buttonIsPressed[i] = true;
       buttonShortPressed[i] = true;
       buttonLongPressed[i] = false;
@@ -172,15 +211,30 @@ ISR(TIMER0_COMPA_vect) {
   } else if (buttonLongPressed[BUTTON1] && currentMode != SETTINGS_MODE) {
     DivergenceMeter_switchMode(SETTINGS_MODE, false);
   }
-  if (settings.main[BRIGHTNESS] == 10) {
-    display_updateAdaptiveBrightness();
-  }
-  if (++clockCount > 9 && currentMode != CLOCK_SET_MODE) {
+  if(++clockCount > 9 && currentMode != CLOCK_SET_MODE){
     settings_readTimeDS3232();
     clockCount = 0;
   }
   if(delayCount > 0){
     delayCount--;
+  }
+  if(buzzTimes){
+    if(buzzIntervalCount++ == buzzInterval){
+      buzzIntervalCount =0;
+      PORTB |= (1<<SPEAKER);
+      if(buzzedDuration++ == buzzDuration){
+        buzzedDuration = 0;
+        PORTB &= ~(1<<SPEAKER);
+        buzzTimes--;
+      }
+    }
+  }
+  if(bit_is_clear(PINA, ALARM_INT)){
+    ringDuration = (ALARM_RING_M * 60);
+    beeps = 1;
+    DivergenceMeter_switchMode(CLOCK_MODE, false);
+    display_on();
+    settings_clearAlarmFlagsDS3232();
   }
   TCNT0H = 0x00;
   TCNT0L = 0x00;
@@ -252,4 +306,10 @@ void DivergenceMeter_sleep(){
 void DivergenceMeter_switchMode(uint8_t mode, bool silent){
   currentMode = mode;
   justEnteredMode[mode] = !silent;
+}
+
+void DivergenceMeter_buzz(uint8_t duration_cs, uint8_t interval, uint8_t times){
+  buzzDuration = duration_cs;
+  buzzInterval = interval;
+  buzzTimes = times;
 }

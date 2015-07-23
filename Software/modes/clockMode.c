@@ -52,11 +52,12 @@ void clockMode_run() {
           return;
         }
       }
-
-      shouldRoll = true;
-      DivergenceMeter_rollWorldLine(false);
-      shouldRoll = false;
-      clockMode_displayDates();
+      if(!ringDuration){
+        shouldRoll = true;
+        DivergenceMeter_rollWorldLine(false);
+        shouldRoll = false;
+        clockMode_displayDates();
+      }
       break;
   }
   if (buttonShortPressed[BUTTON2]) {
@@ -64,9 +65,9 @@ void clockMode_run() {
   } else if (buttonLongPressed[BUTTON2]){
     DivergenceMeter_switchMode(CLOCK_SET_MODE, false);
   } else if (buttonShortPressed[BUTTON3]) {
-    PORTB |= (1<<SPEAKER);
-    DivergenceMeter_delayCS(2);
-    PORTB &= ~(1<<SPEAKER);
+    //alarm arm and disarm
+  }else if (buttonLongPressed[BUTTON3]) {
+    DivergenceMeter_switchMode(ALARM_SET_MODE, false);
   } else if (buttonIsPressed[BUTTON4]) {
     shouldRoll = true;
     DivergenceMeter_rollWorldLineWithDelay(true);
