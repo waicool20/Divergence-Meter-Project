@@ -6,9 +6,21 @@ For changes to the hardware of the project please jump to the # Hardware section
 ## Software
 
 ### [UNRELEASED] - [UNRELEASED]
+
+
+### [0.1.0a] - 2015-07-23
 #### Adding
 - Alarms
 - Resting hours
+- Beep on button press
+
+####Changing
+- Decimal points are now independent of digits
+
+####Fixing
+- Divergence Editing does not roll properly
+- Divergence Editing does not return to tube1 properly
+- Date not showing correctly
 
 
 ### [0.0.1a] - 2015-07-19
