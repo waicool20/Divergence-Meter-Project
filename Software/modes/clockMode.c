@@ -109,10 +109,12 @@ static void clockMode_displayCurrentTime() {
     display_setTube(TUBE1, ((settings.time[HOURS] >> 4) & 0x03), false, false);
     display_setTube(TUBE2, (settings.time[HOURS] & 0x0F), false, false);
   }
-  display_setTube(TUBE6, BLANK, !(settings.time[SECONDS] & 0x01), (settings.time[SECONDS] & 0x01));
+  bool oddSecond = (settings.time[SECONDS] & 0x01);
+  display_setTube(TUBE3, BLANK, oddSecond, !oddSecond);
+
   display_setTube(TUBE4, (settings.time[MINUTES] >> 4), false, false);
   display_setTube(TUBE5, (settings.time[MINUTES] & 0x0F), false, false);
-  display_setTube(TUBE6, BLANK, (settings.time[SECONDS] & 0x01), !(settings.time[SECONDS] & 0x01));
+  display_setTube(TUBE6, BLANK, oddSecond, !oddSecond);
   display_setTube(TUBE7, (settings.time[SECONDS] >> 4), false, false);
   display_setTube(TUBE8, (settings.time[SECONDS] & 0x0F), false, false);
   display_update();
@@ -128,10 +130,10 @@ static void clockMode_displayDates(){
 static void clockMode_displayCurrentDate() {
   display_setTube(TUBE1, ((settings.time[settings.main[DATE_FORMAT_DD_MM] ? DATE : MONTH] >> 4) & 0x03), false, false);
   display_setTube(TUBE2, (settings.time[settings.main[DATE_FORMAT_DD_MM] ? DATE : MONTH] & 0x0F), false, false);
-  display_setTube(TUBE3, BLANK, false, true);
+  display_setTube(TUBE3, BLANK, false, false);
   display_setTube(TUBE4, ((settings.time[settings.main[DATE_FORMAT_DD_MM] ? MONTH : DATE] >> 4) & 0x03), false, false);
   display_setTube(TUBE5, (settings.time[settings.main[DATE_FORMAT_DD_MM] ? MONTH : DATE] & 0x0F), false, false);
-  display_setTube(TUBE3, BLANK, true, false);
+  display_setTube(TUBE6, BLANK, false, false);
   display_setTube(TUBE7, (settings.time[YEAR] >> 4), false, false);
   display_setTube(TUBE8, (settings.time[YEAR] & 0x0F), false, false);
   display_update();
@@ -143,7 +145,7 @@ static void clockMode_displayCurrentDayOfWeek(){
   display_setTube(TUBE3, BLANK, false, false);
   display_setTube(TUBE4, 0, false, false);
   display_setTube(TUBE5, (settings.time[DAY_OF_WEEK]), false, false);
-  display_setTube(TUBE3, BLANK, false, false);
+  display_setTube(TUBE6, BLANK, false, false);
   display_setTube(TUBE7, BLANK, false, false);
   display_setTube(TUBE8, BLANK, false, false);
   display_update();
@@ -155,7 +157,7 @@ static void clockMode_displayArmedAlarms(){
   display_setTube(TUBE3, BLANK, false, false);
   display_setTube(TUBE4, settings.control & 0x01, false, false);
   display_setTube(TUBE5, (settings.control >> 1) & 0x01, false, false);
-  display_setTube(TUBE3, BLANK, false, false);
+  display_setTube(TUBE6, BLANK, false, false);
   display_setTube(TUBE7, BLANK, false, false);
   display_setTube(TUBE8, BLANK, false, false);
   display_update();

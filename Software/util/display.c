@@ -152,11 +152,11 @@ static void handleShiftRegister3() {
     case 9:
     case 0:
     case BLANK:
-      display.showLDP[TUBE6] ? SRSendOne() : SRSendZero();
+      display.showLDP[TUBE3] ? SRSendOne() : SRSendZero();
       SRSendZeros(7);
       break;
     default:
-      display.showLDP[TUBE6] ? SRSendOne() : SRSendZero();
+      display.showLDP[TUBE3] ? SRSendOne() : SRSendZero();
       SRSendZeros(display.tube[TUBE3]-1);
       SRSendOne();
       SRSendZeros(7 - display.tube[TUBE3]);
@@ -188,15 +188,14 @@ void display_setTube(uint8_t tube, uint8_t digit, bool showRDP, bool showLDP){
 }
 
 void display_showCurrentBrightness() {
-  display.tube[TUBE1] = BLANK;
-  display.tube[TUBE2] = BLANK;
-  display.tube[TUBE3] = BLANK;
-  display.tube[TUBE4] = settings.main[BRIGHTNESS] == 10 ? 1 : 0;
-  display.tube[TUBE5] =
-      settings.main[BRIGHTNESS] == 10 ? 0 : settings.main[BRIGHTNESS];
-  display.tube[TUBE6] = BLANK;
-  display.tube[TUBE7] = BLANK;
-  display.tube[TUBE8] = BLANK;
+  display_setTube(TUBE1, BLANK, false, false);
+  display_setTube(TUBE2, BLANK, false, false);
+  display_setTube(TUBE3, BLANK, false, false);
+  display_setTube(TUBE4, settings.main[BRIGHTNESS] == 10 ? 1 : 0, false, false);
+  display_setTube(TUBE5, settings.main[BRIGHTNESS] == 10 ? 0 : settings.main[BRIGHTNESS], false, false);
+  display_setTube(TUBE6, BLANK, false, false);
+  display_setTube(TUBE7, BLANK, false, false);
+  display_setTube(TUBE8, BLANK, false, false);
   display_update();
 }
 

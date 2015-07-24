@@ -34,11 +34,11 @@ uint8_t randb;
 uint8_t randc;
 uint8_t randx;
 
-void RNG_init() {
+void RNG_seed() {
   randa = ADCH;  //Seed with value from LDR
   randb = settings.time[SECONDS];  //Seed with current second
   randc = settings.time[MINUTES];  //Seed with current minute
-  randx = 1;
+  randx = settings.time[HOURS];
 }
 
 void RNG_next() {
@@ -48,14 +48,12 @@ void RNG_next() {
   randc = (randc + ((randb >> 1) ^ randa));
 }
 
+uint8_t RNG_nextByte(){
+  return randc;
+}
+
 uint8_t RNG_nextChar() {
   RNG_next();
   uint8_t temp = randc & 0x0F;
-  return temp > 9 ? temp - (16 - 9) : temp;
-}
-
-uint8_t RNG_nextCharWithDP() {
-  RNG_next();
-  uint8_t temp = randc & 0x0F;
-  return temp > 11 ? temp - (16 - 11) : temp;
+  return temp > 9 ? 15 - temp : temp;
 }

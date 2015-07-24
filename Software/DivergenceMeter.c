@@ -161,7 +161,7 @@ static void DivergenceMeter_init() {
   settings_init();
   settings_clearAlarmFlagsDS3232();
   ADC_init();
-  RNG_init();
+  RNG_seed();
   tmr0_init();
   display_init();
 }
@@ -188,6 +188,7 @@ ISR(TIMER0_COMPA_vect) {
       buttonShortPressed[i] = false;
       buttonLongPressed[i] = false;
     } else if (buttonCount[i] >= (BUTTON_SHORT_PRESS_MIN_DURATION_MS / 10)) {
+      RNG_seed();
       if(settings.main[BEEP_ON_PRESS]){
         DivergenceMeter_buzz(2,2,1);
       }
