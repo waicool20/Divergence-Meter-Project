@@ -49,6 +49,7 @@ void RNG_next() {
 }
 
 uint8_t RNG_nextByte(){
+  RNG_next();
   return randc;
 }
 

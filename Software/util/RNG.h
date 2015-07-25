@@ -22,6 +22,8 @@
 
 void RNG_seed();
 
+uint8_t RNG_nextByte();
+
 uint8_t RNG_nextChar();
 
 uint8_t RNG_nextCharWithDP();

@@ -72,7 +72,7 @@ void divergenceEditMode_run() {
       currentTube = TUBE1;
       DivergenceMeter_switchMode(DIVERGENCE_MODE, true);
       display_saveState();
-      DivergenceMeter_rollWorldLine(false);
+      DivergenceMeter_rollRandomWorldLine(false);
       display_restoreState();
       display_update();
     }

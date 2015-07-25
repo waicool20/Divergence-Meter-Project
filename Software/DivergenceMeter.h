@@ -32,9 +32,11 @@ extern volatile bool buttonLongPressed[5];
 
 extern volatile uint16_t ringDuration;
 
-void DivergenceMeter_rollWorldLine(bool rollTube2);
+void DivergenceMeter_rollWorldLine(bool rollTube2, uint8_t worldline[8]);
 
-void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2);
+void DivergenceMeter_rollRandomWorldLine(bool rollTube2);
+
+void DivergenceMeter_rollRandomWorldLineWithDelay(bool rollTube2);
 
 void DivergenceMeter_showBrightness();
 
