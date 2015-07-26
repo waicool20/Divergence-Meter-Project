@@ -6,6 +6,9 @@ For changes to the hardware of the project please jump to the # Hardware section
 ## Software
 
 ### [UNRELEASED] - [UNRELEASED]
+
+
+### [0.2.0a] - 2015-07-26
 #### Adding
 - BOM
 - User Manual
