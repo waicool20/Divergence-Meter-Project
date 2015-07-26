@@ -71,10 +71,7 @@ void divergenceEditMode_run() {
     } else {
       currentTube = TUBE1;
       DivergenceMeter_switchMode(DIVERGENCE_MODE, true);
-      display_saveState();
-      DivergenceMeter_rollRandomWorldLine(false);
-      display_restoreState();
-      display_update();
+      DivergenceMeter_rollWorldLine(false, display.tube);
     }
     DivergenceMeter_delayCS(s2cs(0.2));
   } else if (buttonShortPressed[BUTTON5]) {

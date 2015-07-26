@@ -268,7 +268,7 @@ void DivergenceMeter_rollWorldLine(bool rollTube2, uint8_t result[8]){
       return;
     }
     for (int8_t j = TUBE8; j >= TUBE1; j-- ){
-      if(rollTube2 && j == TUBE2){
+      if(!rollTube2 && j == TUBE2){
         display_setTube(j, BLANK, true, false);
         continue;
       }

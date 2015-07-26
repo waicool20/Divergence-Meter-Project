@@ -59,8 +59,7 @@ uint8_t currentWorldLineIndex;
 
 void divergenceMode_run() {
   if (justEnteredMode[DIVERGENCE_MODE]) {
-    DivergenceMeter_rollRandomWorldLine(true);
-    display_saveState();
+    DivergenceMeter_rollRandomWorldLine(false);
     justEnteredMode[DIVERGENCE_MODE] = false;
   }
   if (buttonLongPressed[BUTTON2] && buttonLongPressed[BUTTON3]) {
@@ -78,8 +77,7 @@ void divergenceMode_run() {
         pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE8-1])),
     };
 
-    DivergenceMeter_rollWorldLine(true, result);
-    display_saveState();
+    DivergenceMeter_rollWorldLine(false, result);
     DivergenceMeter_delayCS(s2cs(0.2));
   } else if (buttonIsPressed[BUTTON3]) {
     currentWorldLineIndex = currentWorldLineIndex < 31 ? currentWorldLineIndex + 1 : 0;
@@ -93,18 +91,17 @@ void divergenceMode_run() {
         pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE7-1])),
         pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE8-1])),
     };
-    DivergenceMeter_rollWorldLine(true, result);
-    display_saveState();
+    DivergenceMeter_rollWorldLine(false, result);
     DivergenceMeter_delayCS(s2cs(0.2));
   } else if (buttonIsPressed[BUTTON4]) {
-    DivergenceMeter_rollRandomWorldLine(true);
-    display_saveState();
+    DivergenceMeter_rollRandomWorldLine(false);
   } else if (buttonIsPressed[BUTTON5]) {
+    display_saveState();
     display_toggleBrightness();
     DivergenceMeter_showBrightness();
+    display_restoreState();
+    display_update();
     return;
   }
-  display_restoreState();
-  display_update();
 }
 
