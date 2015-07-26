@@ -6,6 +6,14 @@ For changes to the hardware of the project please jump to the # Hardware section
 ## Software
 
 ### [UNRELEASED] - [UNRELEASED]
+#### Adding
+- User Manual
+
+#### Changing
+- Visually correct world line rolling
+
+#### Fixing
+- Display errors on tube3 and tube6
 
 
 ### [0.1.0a] - 2015-07-23
