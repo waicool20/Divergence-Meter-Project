@@ -29,9 +29,9 @@
 #define TUBE7 6
 #define TUBE8 7
 
-#define ROLL_SECONDS 2
+#define ROLL_CONST 3 //Constant for when rolling a world line a larger value makes it roll longer
 #define ROLL_INTERVAL_MS 25
-#define ROLL_DISPLAY_SECONDS 3
+#define ROLL_DISPLAY_SECONDS 1
 
 #define ALARM_INT PA1
 

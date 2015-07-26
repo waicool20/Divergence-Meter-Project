@@ -161,7 +161,7 @@ static void DivergenceMeter_init() {
   settings_init();
   settings_clearAlarmFlagsDS3232();
   ADC_init();
-  RNG_init();
+  RNG_seed();
   tmr0_init();
   display_init();
 }
@@ -197,6 +197,7 @@ ISR(TIMER0_COMPA_vect) {
     }
   }
   if (buttonShortPressed[BUTTON1]) {
+    RNG_seed();
     switch (currentMode){
       case SETTINGS_MODE:
         settings_writeSettingsDS3232();
@@ -246,22 +247,46 @@ static bool DivergenceMeter_shouldNotRoll() {
   return currentMode != DIVERGENCE_MODE && !shouldRoll;
 }
 
-void DivergenceMeter_rollWorldLine(bool rollTube2) {
-  for (uint8_t i = ((ROLL_SECONDS * 1000) / ROLL_INTERVAL_MS); i > 0; i--) {
+void DivergenceMeter_rollWorldLine(bool rollTube2, uint8_t result[8]){
+  uint8_t randChar[8] = {
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE1]) + result[TUBE1], ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE2]) + result[TUBE2],
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE3]) + result[TUBE3], ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE4]) + result[TUBE4],
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE5]) + result[TUBE5], ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE6]) + result[TUBE6],
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE7]) + result[TUBE7], ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE8]) + result[TUBE8],
+  };
+
+
+  uint8_t maxNumber = 0;
+  for (int8_t i = TUBE8; i >= TUBE1; i-- ){
+    if(maxNumber < randChar[i]){
+      maxNumber = randChar[i];
+    }
+  }
+
+  for(uint8_t i = 0; i < maxNumber; i++){
     if (DivergenceMeter_shouldNotRoll()) {
       return;
     }
-    uint8_t digit = i > 1 ? RNG_nextChar() : (RNG_nextChar() == 9 ? BLANK : (RNG_nextChar() == 8 ? 1 : 0));
-    display_setTube(TUBE1, digit,false,false);
-    rollTube2 ? display_setTube(TUBE2,BLANK,true,false) : display_setTube(TUBE2,RNG_nextChar(),false,false);
-    display_setTube(TUBE3, RNG_nextChar(),false,false);
-    display_setTube(TUBE4, RNG_nextChar(),false,false);
-    display_setTube(TUBE5, RNG_nextChar(),false,false);
-    display_setTube(TUBE6, RNG_nextChar(),false,false);
-    display_setTube(TUBE7, RNG_nextChar(),false,false);
-    display_setTube(TUBE8, RNG_nextChar(),false,false);
+    for (int8_t j = TUBE8; j >= TUBE1; j-- ){
+      if(!rollTube2 && j == TUBE2){
+        display_setTube(j, BLANK, true, false);
+        continue;
+      }
+      if(randChar[j] > 0){
+        if(display.tube[j] < 9){
+          display_setTube(j, display.tube[j] + 1,false,false);
+        } else {
+          display_setTube(j, 0,false,false);
+        }
+        randChar[j]--;
+      } else {
+        if(result[j] == BLANK){
+          display_setTube(j, BLANK,false,false);
+        }
+      }
+    }
     display_update();
-    for (uint8_t i = (ROLL_INTERVAL_MS / 10); i > 0; i--) {
+    for (uint8_t j = (ROLL_INTERVAL_MS / 10); j > 0; j--) {
       if (DivergenceMeter_shouldNotRoll()) {
         return;
       }
@@ -270,8 +295,18 @@ void DivergenceMeter_rollWorldLine(bool rollTube2) {
   }
 }
 
-void DivergenceMeter_rollWorldLineWithDelay(bool rollTube2) {
-  DivergenceMeter_rollWorldLine(rollTube2);
+void DivergenceMeter_rollRandomWorldLine(bool rollTube2) {
+  uint8_t results[8] = {
+      (RNG_nextByte() > 235 ? BLANK : (RNG_nextByte() > 195 ? 1 : 0)), RNG_nextChar(),
+      RNG_nextChar(), RNG_nextChar(),
+      RNG_nextChar(), RNG_nextChar(),
+      RNG_nextChar(), RNG_nextChar()
+  };
+  DivergenceMeter_rollWorldLine(rollTube2, results);
+}
+
+void DivergenceMeter_rollRandomWorldLineWithDelay(bool rollTube2) {
+  DivergenceMeter_rollRandomWorldLine(rollTube2);
   for (uint16_t i = (ROLL_DISPLAY_SECONDS * 100); i > 0; i--) {
     if (DivergenceMeter_shouldNotRoll()) {
       return;

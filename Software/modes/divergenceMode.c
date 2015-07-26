@@ -29,9 +29,6 @@
 
 /* Prototypes */
 
-static void DivergenceMeter_showCurrentWorldLine();
-static void DivergenceMeter_showPrevWorldLine();
-static void DivergenceMeter_showNextWorldLine();
 
 /* World line constants */
 
@@ -62,52 +59,49 @@ uint8_t currentWorldLineIndex;
 
 void divergenceMode_run() {
   if (justEnteredMode[DIVERGENCE_MODE]) {
-    DivergenceMeter_rollWorldLine(true);
-    display_saveState();
+    DivergenceMeter_rollRandomWorldLine(false);
     justEnteredMode[DIVERGENCE_MODE] = false;
   }
   if (buttonLongPressed[BUTTON2] && buttonLongPressed[BUTTON3]) {
     DivergenceMeter_switchMode(DIVERGENCE_EDIT_MODE, false);
   } else if (buttonIsPressed[BUTTON2]) {
-    DivergenceMeter_rollWorldLine(true);
-    DivergenceMeter_showPrevWorldLine();
-    display_saveState();
+    currentWorldLineIndex = currentWorldLineIndex > 0 ? currentWorldLineIndex - 1 : 31;
+    uint8_t result[8] = {
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE1])),
+        BLANK,
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE3-1])),
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE4-1])),
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE5-1])),
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE6-1])),
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE7-1])),
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE8-1])),
+    };
+
+    DivergenceMeter_rollWorldLine(false, result);
     DivergenceMeter_delayCS(s2cs(0.2));
   } else if (buttonIsPressed[BUTTON3]) {
-    DivergenceMeter_rollWorldLine(true);
-    DivergenceMeter_showNextWorldLine();
-    display_saveState();
+    currentWorldLineIndex = currentWorldLineIndex < 31 ? currentWorldLineIndex + 1 : 0;
+    uint8_t result[8] = {
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE1])),
+        BLANK,
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE3-1])),
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE4-1])),
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE5-1])),
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE6-1])),
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE7-1])),
+        pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE8-1])),
+    };
+    DivergenceMeter_rollWorldLine(false, result);
     DivergenceMeter_delayCS(s2cs(0.2));
   } else if (buttonIsPressed[BUTTON4]) {
-    DivergenceMeter_rollWorldLine(true);
-    display_saveState();
+    DivergenceMeter_rollRandomWorldLine(false);
   } else if (buttonIsPressed[BUTTON5]) {
+    display_saveState();
     display_toggleBrightness();
     DivergenceMeter_showBrightness();
+    display_restoreState();
+    display_update();
     return;
   }
-  display_restoreState();
-  display_update();
 }
 
-static void DivergenceMeter_showCurrentWorldLine() {
-  display_setTube(TUBE1, (pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE1]))), false, false);
-  display_setTube(TUBE2, BLANK, true, false);
-  display_setTube(TUBE3, (pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE3-1]))), false, false);
-  display_setTube(TUBE4, (pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE4-1]))), false, false);
-  display_setTube(TUBE5, (pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE5-1]))), false, false);
-  display_setTube(TUBE6, (pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE6-1]))), false, false);
-  display_setTube(TUBE7, (pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE7-1]))), false, false);
-  display_setTube(TUBE8, (pgm_read_byte(&(WORLD_LINES[currentWorldLineIndex][TUBE8-1]))), false, false);
-  display_update();
-}
-
-static void DivergenceMeter_showNextWorldLine() {
-  currentWorldLineIndex = currentWorldLineIndex < 31 ? currentWorldLineIndex + 1 : 0;
-  DivergenceMeter_showCurrentWorldLine();
-}
-
-static void DivergenceMeter_showPrevWorldLine() {
-  currentWorldLineIndex = currentWorldLineIndex > 0 ? currentWorldLineIndex - 1 : 31;
-  DivergenceMeter_showCurrentWorldLine();
-}
