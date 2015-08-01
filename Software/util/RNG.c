@@ -48,7 +48,7 @@ void RNG_next() {
   randc = (randc + ((randb >> 1) ^ randa));
 }
 
-uint8_t RNG_nextByte(){
+uint8_t RNG_nextByte() {
   RNG_next();
   return randc;
 }

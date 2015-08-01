@@ -84,19 +84,19 @@ int main() {
   while (1) {
     if (oldSecond != settings.time[SECONDS]) {
       oldSecond = settings.time[SECONDS];
-      if(ringDuration > 0){
+      if (ringDuration > 0) {
         ringDuration--;
       }
       beepIncCount++;
-      if(ringDuration){
-        if(!(settings.time[SECONDS] & 0x01)){
-          DivergenceMeter_buzz(2,8,beeps);
+      if (ringDuration) {
+        if (!(settings.time[SECONDS] & 0x01)) {
+          DivergenceMeter_buzz(2, 8, beeps);
         }
       }
     }
-    if(beepIncCount > BEEP_INC_INTERVAL_S){
+    if (beepIncCount > BEEP_INC_INTERVAL_S) {
       beepIncCount = 0;
-      if(beeps < MAX_BEEPS){
+      if (beeps < MAX_BEEPS) {
         beeps++;
       }
     }
@@ -188,8 +188,8 @@ ISR(TIMER0_COMPA_vect) {
       buttonShortPressed[i] = false;
       buttonLongPressed[i] = false;
     } else if (buttonCount[i] >= (BUTTON_SHORT_PRESS_MIN_DURATION_MS / 10)) {
-      if(settings.main[BEEP_ON_PRESS]){
-        DivergenceMeter_buzz(2,2,1);
+      if (settings.main[BEEP_ON_PRESS]) {
+        DivergenceMeter_buzz(2, 2, 1);
       }
       buttonIsPressed[i] = true;
       buttonShortPressed[i] = true;
@@ -198,7 +198,7 @@ ISR(TIMER0_COMPA_vect) {
   }
   if (buttonShortPressed[BUTTON1]) {
     RNG_seed();
-    switch (currentMode){
+    switch (currentMode) {
       case SETTINGS_MODE:
         settings_writeSettingsDS3232();
         break;
@@ -211,25 +211,25 @@ ISR(TIMER0_COMPA_vect) {
   } else if (buttonLongPressed[BUTTON1] && currentMode != SETTINGS_MODE) {
     DivergenceMeter_switchMode(SETTINGS_MODE, false);
   }
-  if(++clockCount > 9 && currentMode != CLOCK_SET_MODE){
+  if (++clockCount > 9 && currentMode != CLOCK_SET_MODE) {
     settings_readTimeDS3232();
     clockCount = 0;
   }
-  if(delayCount > 0){
+  if (delayCount > 0) {
     delayCount--;
   }
-  if(buzzTimes){
-    if(buzzIntervalCount++ == buzzInterval){
-      buzzIntervalCount =0;
-      PORTB |= (1<<SPEAKER);
-      if(buzzedDuration++ == buzzDuration){
+  if (buzzTimes) {
+    if (buzzIntervalCount++ == buzzInterval) {
+      buzzIntervalCount = 0;
+      PORTB |= (1 << SPEAKER);
+      if (buzzedDuration++ == buzzDuration) {
         buzzedDuration = 0;
-        PORTB &= ~(1<<SPEAKER);
+        PORTB &= ~(1 << SPEAKER);
         buzzTimes--;
       }
     }
   }
-  if(bit_is_clear(PINA, ALARM_INT)){
+  if (bit_is_clear(PINA, ALARM_INT)) {
     ringDuration = (ALARM_RING_M * 60);
     beeps = 1;
     beepIncCount = 0;
@@ -247,41 +247,45 @@ static bool DivergenceMeter_shouldNotRoll() {
   return currentMode != DIVERGENCE_MODE && !shouldRoll;
 }
 
-void DivergenceMeter_rollWorldLine(bool rollTube2, uint8_t result[8]){
-  uint8_t randChar[8] = {
-      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE1]) + result[TUBE1], ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE2]) + result[TUBE2],
-      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE3]) + result[TUBE3], ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE4]) + result[TUBE4],
-      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE5]) + result[TUBE5], ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE6]) + result[TUBE6],
-      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE7]) + result[TUBE7], ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE8]) + result[TUBE8],
-  };
-
+void DivergenceMeter_rollWorldLine(bool rollTube2, uint8_t result[8]) {
+  uint8_t randChar[8] = { ((RNG_nextChar() + ROLL_CONST) * 10)
+      + (10 - display.tube[TUBE1]) + result[TUBE1], ((RNG_nextChar()
+      + ROLL_CONST) * 10) + (10 - display.tube[TUBE2]) + result[TUBE2],
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE3])
+          + result[TUBE3], ((RNG_nextChar() + ROLL_CONST) * 10)
+          + (10 - display.tube[TUBE4]) + result[TUBE4], ((RNG_nextChar()
+          + ROLL_CONST) * 10) + (10 - display.tube[TUBE5]) + result[TUBE5],
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE6])
+          + result[TUBE6], ((RNG_nextChar() + ROLL_CONST) * 10)
+          + (10 - display.tube[TUBE7]) + result[TUBE7], ((RNG_nextChar()
+          + ROLL_CONST) * 10) + (10 - display.tube[TUBE8]) + result[TUBE8], };
 
   uint8_t maxNumber = 0;
-  for (int8_t i = TUBE8; i >= TUBE1; i-- ){
-    if(maxNumber < randChar[i]){
+  for (int8_t i = TUBE8; i >= TUBE1; i--) {
+    if (maxNumber < randChar[i]) {
       maxNumber = randChar[i];
     }
   }
 
-  for(uint8_t i = 0; i < maxNumber; i++){
+  for (uint8_t i = 0; i < maxNumber; i++) {
     if (DivergenceMeter_shouldNotRoll()) {
       return;
     }
-    for (int8_t j = TUBE8; j >= TUBE1; j-- ){
-      if(!rollTube2 && j == TUBE2){
+    for (int8_t j = TUBE8; j >= TUBE1; j--) {
+      if (!rollTube2 && j == TUBE2) {
         display_setTube(j, BLANK, true, false);
         continue;
       }
-      if(randChar[j]){
-        if(display.tube[j] < 9){
-          display_setTube(j, display.tube[j] + 1,false,false);
+      if (randChar[j]) {
+        if (display.tube[j] < 9) {
+          display_setTube(j, display.tube[j] + 1, false, false);
         } else {
-          display_setTube(j, 0,false,false);
+          display_setTube(j, 0, false, false);
         }
         randChar[j]--;
       } else {
-        if(result[j] == BLANK){
-        display_setTube(j, BLANK,false,false);
+        if (result[j] == BLANK) {
+          display_setTube(j, BLANK, false, false);
         }
       }
     }
@@ -296,12 +300,10 @@ void DivergenceMeter_rollWorldLine(bool rollTube2, uint8_t result[8]){
 }
 
 void DivergenceMeter_rollRandomWorldLine(bool rollTube2) {
-  uint8_t results[8] = {
-      (RNG_nextByte() > 235 ? BLANK : (RNG_nextByte() > 195 ? 1 : 0)), RNG_nextChar(),
-      RNG_nextChar(), RNG_nextChar(),
-      RNG_nextChar(), RNG_nextChar(),
-      RNG_nextChar(), RNG_nextChar()
-  };
+  uint8_t results[8] = { (
+      RNG_nextByte() > 235 ? BLANK : (RNG_nextByte() > 195 ? 1 : 0)),
+      RNG_nextChar(), RNG_nextChar(), RNG_nextChar(), RNG_nextChar(),
+      RNG_nextChar(), RNG_nextChar(), RNG_nextChar() };
   DivergenceMeter_rollWorldLine(rollTube2, results);
 }
 
@@ -320,30 +322,32 @@ void DivergenceMeter_showBrightness() {
   DivergenceMeter_delayCS(s2cs(BRIGHTNESS_DISPLAY_S));
 }
 
-void DivergenceMeter_delayCS(uint16_t delay_cs){
+void DivergenceMeter_delayCS(uint16_t delay_cs) {
   delayCount = delay_cs;
-  while(delayCount){
+  while (delayCount) {
     DivergenceMeter_sleep();
   }
 }
 
-void DivergenceMeter_sleep(){
+void DivergenceMeter_sleep() {
   set_sleep_mode(SLEEP_MODE_IDLE);
-  sleep_enable();
+  sleep_enable()
+  ;
   sleep_bod_disable();
   sei();
   power_adc_disable();
   power_usi_disable();
-  sleep_disable();
+  sleep_disable()
+  ;
   power_adc_enable();
 }
 
-void DivergenceMeter_switchMode(uint8_t mode, bool silent){
+void DivergenceMeter_switchMode(uint8_t mode, bool silent) {
   currentMode = mode;
   justEnteredMode[mode] = !silent;
 }
 
-void DivergenceMeter_buzz(uint8_t duration_cs, uint8_t interval, uint8_t times){
+void DivergenceMeter_buzz(uint8_t duration_cs, uint8_t interval, uint8_t times) {
   buzzDuration = duration_cs;
   buzzInterval = interval;
   buzzTimes = times;

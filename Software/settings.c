@@ -38,7 +38,7 @@ void settings_init() {
   i2c_init();
   settings_readDS3232();
   if (!settings.not_first_boot) {
-    for(int8_t i = 7; i > 0; i--){
+    for (int8_t i = 7; i > 0; i--) {
       settings.main[i] = 0;
     }
     settings.main[BRIGHTNESS] = pgm_read_byte(&(default_brightness));
@@ -108,7 +108,7 @@ void settings_readSettingsDS3232() {
   i2c_stop();
 }
 
-void settings_readControlDS3232(){
+void settings_readControlDS3232() {
   i2c_start_wait(DS3232 + I2C_WRITE);
   i2c_write(0x0E);
   i2c_rep_start(DS3232 + I2C_READ);
@@ -116,7 +116,7 @@ void settings_readControlDS3232(){
   i2c_stop();
 }
 
-void settings_readControlStatusDS3232(){
+void settings_readControlStatusDS3232() {
   i2c_start_wait(DS3232 + I2C_WRITE);
   i2c_write(0x0F);
   i2c_rep_start(DS3232 + I2C_READ);
@@ -185,21 +185,21 @@ void settings_writeSettingsDS3232() {
   i2c_stop();
 }
 
-void settings_writeControlDS3232(){
+void settings_writeControlDS3232() {
   i2c_start_wait(DS3232 + I2C_WRITE);
   i2c_write(0x0E);
   i2c_write(settings.control);
   i2c_stop();
 }
 
-void settings_writeControlStatusDS3232(){
+void settings_writeControlStatusDS3232() {
   i2c_start_wait(DS3232 + I2C_WRITE);
   i2c_write(0x0F);
   i2c_write(settings.controlStatus);
   i2c_stop();
 }
 
-void settings_clearAlarmFlagsDS3232(){
+void settings_clearAlarmFlagsDS3232() {
   settings.controlStatus &= 0xFC;
   settings_writeControlStatusDS3232();
 }

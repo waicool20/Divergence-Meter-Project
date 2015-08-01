@@ -132,7 +132,7 @@ static void handleShiftRegister2() {
     case 2:
     case 3:
       display.showLDP[TUBE6] ? SRSendOne() : SRSendZero();
-      SRSendZeros(display.tube[TUBE6]-1);
+      SRSendZeros(display.tube[TUBE6] - 1);
       SRSendOne();
       SRSendZeros(3 - display.tube[TUBE6]);
       break;
@@ -157,7 +157,7 @@ static void handleShiftRegister3() {
       break;
     default:
       display.showLDP[TUBE3] ? SRSendOne() : SRSendZero();
-      SRSendZeros(display.tube[TUBE3]-1);
+      SRSendZeros(display.tube[TUBE3] - 1);
       SRSendOne();
       SRSendZeros(7 - display.tube[TUBE3]);
       break;
@@ -181,7 +181,7 @@ void display_off() {
   PORTB |= (1 << HV_DISABLE);
 }
 
-void display_setTube(uint8_t tube, uint8_t digit, bool showRDP, bool showLDP){
+void display_setTube(uint8_t tube, uint8_t digit, bool showRDP, bool showLDP) {
   display.tube[tube] = digit;
   display.showRDP[tube] = showRDP;
   display.showLDP[tube] = showLDP;
@@ -192,7 +192,10 @@ void display_showCurrentBrightness() {
   display_setTube(TUBE2, BLANK, false, false);
   display_setTube(TUBE3, BLANK, false, false);
   display_setTube(TUBE4, settings.main[BRIGHTNESS] == 10 ? 1 : 0, false, false);
-  display_setTube(TUBE5, settings.main[BRIGHTNESS] == 10 ? 0 : settings.main[BRIGHTNESS], false, false);
+  display_setTube(
+      TUBE5, settings.main[BRIGHTNESS] == 10 ? 0 : settings.main[BRIGHTNESS],
+      false,
+      false);
   display_setTube(TUBE6, BLANK, false, false);
   display_setTube(TUBE7, BLANK, false, false);
   display_setTube(TUBE8, BLANK, false, false);
@@ -226,7 +229,8 @@ void display_decreaseBrightness() {
 }
 
 void display_toggleBrightness() {
-  settings.main[BRIGHTNESS] = settings.main[BRIGHTNESS] < 10 ? settings.main[BRIGHTNESS] + 1 : 0;
+  settings.main[BRIGHTNESS] =
+      settings.main[BRIGHTNESS] < 10 ? settings.main[BRIGHTNESS] + 1 : 0;
   OCR1A = pgm_read_word(&(brightnessLevels[settings.main[BRIGHTNESS]]));
   settings_writeSettingsDS3232();
 }

@@ -22,9 +22,7 @@
 #include <stdbool.h>
 
 typedef struct {
-  uint8_t tube[8];
-  bool showRDP[8];
-  bool showLDP[8];
+  uint8_t tube[8];bool showRDP[8];bool showLDP[8];
 } Display;
 
 extern Display display;
