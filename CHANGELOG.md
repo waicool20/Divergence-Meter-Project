@@ -8,6 +8,11 @@ For changes to the hardware of the project please jump to the # Hardware section
 ### [UNRELEASED] - [UNRELEASED]
 
 
+### [0.2.3a] - 2015-08-01
+#### Fixing
+- Getting 9 when rolling for a BLANK digit (Intermittent)
+
+
 ### [0.2.2a] - 2015-08-01
 #### Changing
 - Smooth roll transitions into date at the end of minute
