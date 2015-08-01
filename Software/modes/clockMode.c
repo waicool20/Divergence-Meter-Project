@@ -55,7 +55,7 @@ void clockMode_run() {
       }
       if(!ringDuration){
         shouldRoll = true;
-        DivergenceMeter_rollRandomWorldLine(false);
+        DivergenceMeter_rollRandomWorldLine(true);
         shouldRoll = false;
         clockMode_displayDates();
       }
@@ -82,7 +82,7 @@ void clockMode_run() {
     DivergenceMeter_switchMode(ALARM_SET_MODE, false);
   } else if (buttonIsPressed[BUTTON4]) {
     shouldRoll = true;
-    DivergenceMeter_rollRandomWorldLineWithDelay(true);
+    DivergenceMeter_rollRandomWorldLineWithDelay(false);
   } else if (buttonIsPressed[BUTTON5]) {
     display_toggleBrightness();
     DivergenceMeter_showBrightness();
