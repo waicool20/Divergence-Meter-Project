@@ -272,7 +272,7 @@ void DivergenceMeter_rollWorldLine(bool rollTube2, uint8_t result[8]){
         display_setTube(j, BLANK, true, false);
         continue;
       }
-      if(randChar[j] > 0){
+      if(randChar[j]){
         if(display.tube[j] < 9){
           display_setTube(j, display.tube[j] + 1,false,false);
         } else {
@@ -281,7 +281,7 @@ void DivergenceMeter_rollWorldLine(bool rollTube2, uint8_t result[8]){
         randChar[j]--;
       } else {
         if(result[j] == BLANK){
-          display_setTube(j, BLANK,false,false);
+        display_setTube(j, BLANK,false,false);
         }
       }
     }
