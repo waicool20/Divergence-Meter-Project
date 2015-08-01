@@ -248,17 +248,16 @@ static bool DivergenceMeter_shouldNotRoll() {
 }
 
 void DivergenceMeter_rollWorldLine(bool rollTube2, uint8_t result[8]) {
-  uint8_t randChar[8] = { ((RNG_nextChar() + ROLL_CONST) * 10)
-      + (10 - display.tube[TUBE1]) + result[TUBE1], ((RNG_nextChar()
-      + ROLL_CONST) * 10) + (10 - display.tube[TUBE2]) + result[TUBE2],
-      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE3])
-          + result[TUBE3], ((RNG_nextChar() + ROLL_CONST) * 10)
-          + (10 - display.tube[TUBE4]) + result[TUBE4], ((RNG_nextChar()
-          + ROLL_CONST) * 10) + (10 - display.tube[TUBE5]) + result[TUBE5],
-      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE6])
-          + result[TUBE6], ((RNG_nextChar() + ROLL_CONST) * 10)
-          + (10 - display.tube[TUBE7]) + result[TUBE7], ((RNG_nextChar()
-          + ROLL_CONST) * 10) + (10 - display.tube[TUBE8]) + result[TUBE8], };
+  uint8_t randChar[8] = {
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE1]) + result[TUBE1],
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE2]) + result[TUBE2],
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE3]) + result[TUBE3],
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE4]) + result[TUBE4],
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE5]) + result[TUBE5],
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE6]) + result[TUBE6],
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE7]) + result[TUBE7],
+      ((RNG_nextChar() + ROLL_CONST) * 10) + (10 - display.tube[TUBE8]) + result[TUBE8],
+  };
 
   uint8_t maxNumber = 0;
   for (int8_t i = TUBE8; i >= TUBE1; i--) {
@@ -283,10 +282,9 @@ void DivergenceMeter_rollWorldLine(bool rollTube2, uint8_t result[8]) {
           display_setTube(j, 0, false, false);
         }
         randChar[j]--;
-      } else {
-        if (result[j] == BLANK) {
-          display_setTube(j, BLANK, false, false);
-        }
+      }
+      if (result[j] == BLANK && randChar[j] < 5) {
+        display_setTube(j, BLANK, false, false);
       }
     }
     display_update();
