@@ -5,7 +5,7 @@ Hi~ I'm waicool20, this is the Divergence Meter Project! Just in case you're won
 
 Well anyways originally this project is based on this guy's project: http://www.mindspring.com/~tomtitor/ and it has helped greatly so I guess give him some credit? I tried to improve his design by improving electronics design with power efficiency and mind-friendliness in mind (hence the AVR so we can code in C :D) I designed the thing in Diptrace, but I have also included Gerber/Drill files in a convenient zip so you can just hand it to some manufacturer to make some boards (remember to remind them that it's 2 separate boards in a single zip and not one!) included also are the schematic PDFs which are not quite convenient... orz anyways have a look around.
 
-I just pulled this off my blog ( http://waicool20.ga ) and it's not all the differences I think...feel free to help me expand this list :p
+I just pulled this off my blog ( http://waicool20.com ) and it's not all the differences I think...feel free to help me expand this list :p
 
 > Additional Features:
 > - 5 switches possible! Could be less if you tweak the software
