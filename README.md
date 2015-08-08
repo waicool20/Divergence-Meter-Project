@@ -24,6 +24,15 @@ I just pulled this off my blog ( http://waicool20.com ) and it's not all the dif
 > Limitations:
 > - Can only use the DS3232 RTC and not the DS1307
 
+Features in a nutshell:
+- 2 Alarms
+- Adaptive Brightness (Brightness changes according to surroundings)
+- Turn on/off display at certain times.
+- 9V battery for portability and DC Jack for stationary setups
+- 5 buttons for control
+- Custom World Lines
+- 32 Preset world lines from the anime/VN
+
 ##Project Structure
 Well the Hardware and Software git branches are separate so that they can be developed independently easily.
 
