@@ -72,8 +72,8 @@ Settings:
 | 03 | 0 | 0 | 1 | 0 for silent buttons, 1 for beep on press |
 | 04 | 0 | 0 | 23 | Combined with settings 05 to set the start time of resting time |
 | 05 | 0 | 0 | 59 | Combined with settings 04 to set the start time of resting time |
-| 06 | 0 | 0 | 23 | Combined with settings 05 to set the start time of waking time |
-| 07 | 0 | 0 | 59 | Combined with settings 04 to set the start time of waking time |
+| 06 | 0 | 0 | 23 | Combined with settings 07 to set the start time of waking time |
+| 07 | 0 | 0 | 59 | Combined with settings 06 to set the start time of waking time |
 
 Button Functions:
 
