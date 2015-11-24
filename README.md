@@ -44,7 +44,7 @@ Well to keep it simple the hardware and the software are licensed with the TAPR 
 ##Safety Disclaimer
 **THIS PROJECT CONTAINS HIGH VOLTAGES (~170V) IT CAN KILL YOU IN THE WORST CASE SO BE CAREFUL.**  
 
-The project has already minimized High Voltage (assuming you have a solder mask) so the only places you need to be careful are the parts around the LM3481, the HV pin on the board connector, and most of the pins on the Nixie Board. When constructing the device, please make sure no high voltage areas touch the case or anything that's not supposed to be "live" like seriously it will make your life easier.
+The project has already minimized risk of contact with High Voltage (assuming you have a solder mask) so the only places you need to be careful are the parts around the LM3481, the HV pin on the board connector, and most of the pins on the Nixie Board. When constructing the device, please make sure no high voltage areas touch the case or anything that's not supposed to be "live", like seriously it will make your life easier.
 
 When handling this device be aware that high voltage can still exist even when the device is completely powered off because of residual power in the capacitors, wait at least 3-5 seconds before touching anything on the pcb after unplugging the device.
 
