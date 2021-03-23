@@ -1,6 +1,8 @@
-#Divergence Meter Project
+# Divergence Meter Project
 
-##Introduction
+This project is now archived, please head over to https://github.com/waicool20/Divergence-Meter-Project-v2 for latest iteration of the project
+
+## Introduction
 Hi~ I'm waicool20, this is the Divergence Meter Project! Just in case you're wondering what project this is about, it's actually a project to make the Divergence Meter from the anime Steins;Gate a reality (If you still don't know what that is, then I'm gonna start questioning why you're here lol, go google it). Basically it displays the current world line you're in. 
 
 Well anyways originally this project is based on this guy's project: http://www.mindspring.com/~tomtitor/ and it has helped greatly so I guess give him some credit? I tried to improve his design by improving electronics design with power efficiency and mind-friendliness in mind (hence the AVR so we can code in C :D) I designed the thing in Diptrace, but I have also included Gerber/Drill files in a convenient zip so you can just hand it to some manufacturer to make some boards (remember to remind them that it's 2 separate boards in a single zip and not one!) included also are the schematic PDFs which are not quite convenient... orz anyways have a look around.
@@ -33,15 +35,15 @@ Features in a nutshell:
 - Custom World Lines
 - 32 Preset world lines from the anime/VN
 
-##Project Structure
+## Project Structure
 Well the Hardware and Software git branches are separate so that they can be developed independently easily.
 
 Basically if you want the latest Software changes please switch to the software branch. Same thing for hardware. Though most often it will be the software branch that will be updated.
 
-##About the licensing...
+## About the licensing...
 Well to keep it simple the hardware and the software are licensed with the TAPR OHL and GPLv3 respectively, if you are gonna use my work feel free to contact me at waicool20@gmail.com or not if that's how you swing. 
 
-##Safety Disclaimer
+## Safety Disclaimer
 **THIS PROJECT CONTAINS HIGH VOLTAGES (~170V) IT CAN KILL YOU IN THE WORST CASE SO BE CAREFUL.**  
 
 The project has already minimized risk of contact with High Voltage (assuming you have a solder mask) so the only places you need to be careful are the parts around the LM3481, the HV pin on the board connector, and most of the pins on the Nixie Board. When constructing the device, please make sure no high voltage areas touch the case or anything that's not supposed to be "live", like seriously it will make your life easier.
